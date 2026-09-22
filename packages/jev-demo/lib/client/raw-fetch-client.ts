@@ -1,5 +1,6 @@
 import type { Questions, SystemOneRequestPayload, SystemOneResult } from "@typesafe-ai/sdk";
 import { JEV_LATEST, MODELS_PATH, SYSTEMONE_PATH, TYPESAFE_API_BASE } from "../constants.js";
+import { readEnv } from "../env.js";
 
 export interface RawFetchConfig {
   apiKey?: string;
@@ -16,7 +17,7 @@ export interface ModelListWire {
 }
 
 function resolveApiKey(config: RawFetchConfig): string {
-  const key = config.apiKey ?? process.env.TYPESAFE_API_KEY;
+  const key = config.apiKey ?? readEnv("TYPESAFE_API_KEY");
   if (!key?.trim()) {
     throw new Error(
       "No API key provided. Set TYPESAFE_API_KEY or pass apiKey to RawTypeSafeClient.",
@@ -35,7 +36,7 @@ export class RawTypeSafeClient {
   readonly fetchImpl: typeof fetch;
 
   constructor(config: RawFetchConfig = {}) {
-    this.baseURL = (config.baseURL ?? process.env.TYPESAFE_BASE_URL ?? TYPESAFE_API_BASE).replace(
+    this.baseURL = (config.baseURL ?? readEnv("TYPESAFE_BASE_URL") ?? TYPESAFE_API_BASE).replace(
       /\/+$/,
       "",
     );
