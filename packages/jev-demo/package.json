@@ -1,0 +1,32 @@
+{
+  "name": "@zotoio/jev-demo",
+  "version": "1.0.0",
+  "description": "Demonstrates every Typesafe.ai Jev (System One) API feature exercisable from application code",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "demo:triage": "tsx cli/support-ticket-triage.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:live": "tsx scripts/test-live.ts"
+  },
+  "keywords": [
+    "typesafe",
+    "jev",
+    "system-one",
+    "structured-decisions"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@typesafe-ai/sdk": "^0.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.29",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.1"
+  }
+}

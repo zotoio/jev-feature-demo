@@ -1,0 +1,13 @@
+{
+  "model": "jev-1.13.0",
+  "answers": {
+    "samePerson": {
+      "type": "noul",
+      "noul": 0.97
+    }
+  },
+  "usage": {
+    "input_tokens": 340,
+    "output_tokens": 20
+  }
+}
