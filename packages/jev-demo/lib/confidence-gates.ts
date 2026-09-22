@@ -67,15 +67,101 @@ export function decideFromChoice<T extends string>(
   };
 }
 
+/** Ordered from lowest to highest privilege — used to cap gate outcomes. */
+const GATE_OUTCOME_ORDER: GateOutcome[] = ["abstain", "deny", "ask_human", "act"];
+
+/** Cap a gate outcome so it does not exceed `maxAllowed` (e.g. mid-score bands). */
+export function capGateOutcome(current: GateOutcome, maxAllowed: GateOutcome): GateOutcome {
+  const currentIdx = GATE_OUTCOME_ORDER.indexOf(current);
+  const maxIdx = GATE_OUTCOME_ORDER.indexOf(maxAllowed);
+  return GATE_OUTCOME_ORDER[Math.min(currentIdx, maxIdx)];
+}
+
+/** Score band policy — score value can cap the routed outcome independently of confidence. */
+export interface ScoreBandPolicy {
+  band: { min: number; max: number };
+  maxOutcome: GateOutcome;
+}
+
+export interface DecideFromScoreOptions {
+  thresholds?: GateThresholds;
+  scoreBands?: ScoreBandPolicy[];
+}
+
+function resolveScoreOptions(
+  thresholdsOrOptions?: GateThresholds | DecideFromScoreOptions,
+): DecideFromScoreOptions {
+  if (!thresholdsOrOptions) return {};
+  if ("scoreBands" in thresholdsOrOptions || !("act" in thresholdsOrOptions)) {
+    return thresholdsOrOptions as DecideFromScoreOptions;
+  }
+  return { thresholds: thresholdsOrOptions };
+}
+
 export function decideFromScore(
   score: number,
   confidence: number,
-  thresholds?: GateThresholds,
+  thresholdsOrOptions?: GateThresholds | DecideFromScoreOptions,
 ): Decision<{ score: number }> {
+  const { thresholds, scoreBands } = resolveScoreOptions(thresholdsOrOptions);
+  let outcome = routeByConfidence(confidence, thresholds);
+  for (const policy of scoreBands ?? []) {
+    if (score >= policy.band.min && score <= policy.band.max) {
+      outcome = capGateOutcome(outcome, policy.maxOutcome);
+    }
+  }
   return {
     proposal: { score },
     confidence,
-    outcome: routeByConfidence(confidence, thresholds),
+    outcome,
+  };
+}
+
+/** Pinned blast-radius band: 0.7–0.9 = touches auth. */
+export const BLAST_RADIUS_TOUCHES_AUTH_BAND = { min: 0.7, max: 0.9 };
+
+export const DEFAULT_BLAST_RADIUS_SCORE_BANDS: ScoreBandPolicy[] = [
+  {
+    band: BLAST_RADIUS_TOUCHES_AUTH_BAND,
+    maxOutcome: "ask_human",
+  },
+];
+
+export interface NoulFactGateContext {
+  requiredFacts: string[];
+  state: Record<string, unknown>;
+}
+
+/**
+ * Gate noul proposals when required facts are absent from state.
+ * Missing facts never promote to act; abstain is upgraded to ask_human with stated gaps.
+ */
+export function decideFromNoulWithRequiredFacts(
+  noul: number,
+  context: NoulFactGateContext,
+  thresholds?: GateThresholds,
+): Decision<{ noul: number; yes: boolean; missingFacts: string[] }> {
+  const base = decideFromNoul(noul, thresholds);
+  const missingFacts = context.requiredFacts.filter((key) => {
+    const value = context.state[key];
+    return value === undefined || value === null || value === "";
+  });
+
+  if (missingFacts.length === 0) {
+    return {
+      ...base,
+      proposal: { ...base.proposal, missingFacts: [] },
+    };
+  }
+
+  let outcome: GateOutcome = base.outcome;
+  if (outcome === "act") outcome = "ask_human";
+  if (outcome === "abstain") outcome = "ask_human";
+
+  return {
+    proposal: { noul, yes: noul >= 0.5, missingFacts },
+    confidence: base.confidence,
+    outcome,
   };
 }
 
