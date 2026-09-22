@@ -20,6 +20,13 @@
     "structured-decisions"
   ],
   "license": "MIT",
+  "exports": {
+    ".": "./lib/JevClient.ts",
+    "./confidence-gates": "./lib/confidence-gates.ts",
+    "./fixture-fetch": "./lib/fixture-fetch.ts",
+    "./demos/*": "./demos/*.ts",
+    "./fixtures/*": "./fixtures/*"
+  },
   "dependencies": {
     "@typesafe-ai/sdk": "^0.6.0"
   },

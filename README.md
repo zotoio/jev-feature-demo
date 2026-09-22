@@ -18,7 +18,39 @@ packages/jev-demo/
   fixtures/             # golden API responses (offline CI)
   tests/                # Vitest matrix (fixture-first)
   scripts/test-live.ts  # optional live smoke (TYPESAFE_API_KEY)
+packages/jev-demo-ui/   # local web playground (thin client over jev-demo lib)
 ```
+
+## Local UI
+
+A browser playground for every Jev surface — no CLI required for exploration.
+
+```bash
+pnpm install
+pnpm ui            # http://localhost:5173
+```
+
+| Panel | What it covers |
+|-------|----------------|
+| **Session** | API key entry, model select (`jev-latest` / pinned), connection test, clear session |
+| **Playground** | Build Noul / Choice / Score (and batch), edit state shapes, run, gate outcomes |
+| **Scenarios** | One-click hard-fail goldens + triage demos from fixtures |
+| **Raw / Advanced** | SDK vs raw HTTP twin parity, request/response viewer |
+
+### Fixture vs live
+
+- **Fixture mode** (default): works with **zero API key** — serves golden JSON from `packages/jev-demo/fixtures/`. Used by CI and first-run.
+- **Live mode**: save an API key in Session, turn off fixture mode — calls `https://api.typesafe.ai` from your browser.
+
+### API key security (localhost only)
+
+- Password-style input; held in **React memory** by default.
+- Optional **“keep for this browser tab”** stores in `sessionStorage` only (tab lifetime).
+- **Never** `localStorage`, never written to `.env`, never logged, never in URLs.
+- **Clear key / lock session** wipes memory and `sessionStorage` immediately.
+- Jev proposes; the UI **never auto-executes side effects** — gate decisions are shown and “Simulate promote” requires an explicit click.
+
+Do not deploy this UI to production with user key entry; it is for local exploration on `localhost` only.
 
 ## Requirements
 
