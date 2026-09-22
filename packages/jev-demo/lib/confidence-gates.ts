@@ -79,6 +79,52 @@ export function decideFromScore(
   };
 }
 
+export interface ChoicePromotion<T extends string> {
+  choice: T;
+  decision: Decision<{ choice: T }>;
+  /** True when code promoted the proposed choice (gate=act and smoke passed). */
+  promoted: boolean;
+  /** True when smoke failed and the proposed act-level choice was rolled back. */
+  rolledBack: boolean;
+}
+
+/**
+ * CLI-owned promote: commit a Choice only when gate=act and smoke passes.
+ * On smoke failure, roll back to fallback and force ask_human (never act above gate).
+ */
+export function promoteChoiceWithSmoke<T extends string>(
+  proposed: T,
+  confidence: number,
+  smokePass: boolean,
+  fallback: T,
+  thresholds?: GateThresholds,
+): ChoicePromotion<T> {
+  const decision = decideFromChoice(proposed, confidence, thresholds);
+  if (decision.outcome === "act" && !smokePass) {
+    return {
+      choice: fallback,
+      decision: {
+        proposal: { choice: fallback },
+        confidence,
+        outcome: "ask_human",
+      },
+      promoted: false,
+      rolledBack: true,
+    };
+  }
+  return {
+    choice: proposed,
+    decision,
+    promoted: decision.outcome === "act",
+    rolledBack: false,
+  };
+}
+
+/** Side-effect router guard — only execute automated actions when gate=act. */
+export function mayAct(outcome: GateOutcome): boolean {
+  return outcome === "act";
+}
+
 /** Summarize token usage for logging / billing dashboards. */
 export function formatUsage(usage: Usage): string {
   return `input=${usage.input_tokens} output=${usage.output_tokens}`;

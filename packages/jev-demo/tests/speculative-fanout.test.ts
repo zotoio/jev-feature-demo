@@ -34,4 +34,17 @@ describe("Speculative fan-out", () => {
     const action = routeSpeculativeFanOut(fixture);
     expect(action.gates.category.proposal.choice).toBe("billing");
   });
+
+  it("never applies side effects unless gate=act", () => {
+    const fixture = loadFixture<Parameters<typeof routeSpeculativeFanOut>[0]>(
+      "systemone/speculative-fanout-billing.json",
+    );
+    fixture.answers.refundRequested.noul = 0.52;
+    fixture.answers.frustration.confidence = 0.72;
+
+    const action = routeSpeculativeFanOut(fixture);
+    expect(action.notes.some((n) => n.includes("refund"))).toBe(false);
+    expect(action.notes.some((n) => n.includes("frustration"))).toBe(false);
+    expect(action.priority).toBe("normal");
+  });
 });

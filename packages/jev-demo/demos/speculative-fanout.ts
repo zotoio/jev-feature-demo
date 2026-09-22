@@ -4,6 +4,7 @@ import {
   decideFromChoice,
   decideFromNoul,
   decideFromScore,
+  mayAct,
   type Decision,
   type GateOutcome,
 } from "../lib/confidence-gates.js";
@@ -57,7 +58,7 @@ export function routeSpeculativeFanOut(response: SpeculativeResponse): TriageAct
     handler = "engineering";
     const severity = bugSeverity.score;
     const repro = decideFromNoul(hasReproSteps.noul);
-    if (severity > 1.5 && repro.proposal.yes && repro.outcome === "act") {
+    if (severity > 1.5 && repro.proposal.yes && mayAct(repro.outcome)) {
       priority = "high";
       notes.push("Escalate: high severity bug with repro steps");
     } else {
@@ -66,7 +67,7 @@ export function routeSpeculativeFanOut(response: SpeculativeResponse): TriageAct
   } else if (category.choice === "billing") {
     handler = "billing";
     const refund = decideFromNoul(refundRequested.noul);
-    if (refund.proposal.yes && refund.outcome !== "abstain") {
+    if (refund.proposal.yes && mayAct(refund.outcome)) {
       notes.push("Flag likely refund request");
     }
   } else if (category.choice === "feature_request") {
@@ -77,7 +78,7 @@ export function routeSpeculativeFanOut(response: SpeculativeResponse): TriageAct
   }
 
   const frustrationDecision = decideFromScore(frustration.score, frustration.confidence);
-  if (frustration.score > 1.5) {
+  if (frustration.score > 1.5 && mayAct(frustrationDecision.outcome)) {
     priority = "high";
     notes.push("Priority response: elevated frustration");
   }
