@@ -22,6 +22,12 @@ export function systemOneRoute(fixturePath: string, status = 200): MockRoute {
   return systemOneRouteWithBody(loadFixture(fixturePath), status);
 }
 
+/** Serve the nested `response` from a hard-fail composite fixture. */
+export function hardFailSystemOneRoute(fixturePath: string, status = 200): MockRoute {
+  const composite = loadFixture<{ response: unknown }>(fixturePath);
+  return systemOneRouteWithBody(composite.response, status);
+}
+
 export function modelsRoute(fixturePath = "models/list.json"): MockRoute {
   return modelsRouteWithBody(loadFixture(fixturePath));
 }

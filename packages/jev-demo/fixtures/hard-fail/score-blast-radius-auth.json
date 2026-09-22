@@ -1,0 +1,41 @@
+{
+  "scenario": "score-hard-fail",
+  "promptContract": {
+    "system": "Jev proposes only; code promotes — never self-promote.",
+    "questionKey": "blastRadius",
+    "bandAnchors": {
+      "touchesAuth": { "min": 0.7, "max": 0.9 }
+    },
+    "midScoreMaxOutcome": "ask_human"
+  },
+  "state": {
+    "change": {
+      "files": ["src/auth/session.ts", "src/auth/middleware.ts"],
+      "summary": "Refactors session validation and token refresh"
+    }
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "blastRadius": {
+        "type": "score",
+        "score": 0.82,
+        "legend": {
+          "0": "Isolated — no shared dependencies",
+          "0.5": "Touches shared modules",
+          "1": "Touches auth or billing core"
+        },
+        "probabilities": {
+          "0": 0.05,
+          "0.5": 0.12,
+          "1": 0.83
+        },
+        "confidence": 0.94
+      }
+    },
+    "usage": {
+      "input_tokens": 388,
+      "output_tokens": 24
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "scenario": "choice-hard-fail",
+  "promptContract": {
+    "system": "Jev proposes only; code promotes — never self-promote.",
+    "questionKey": "deployStrategy",
+    "lockedOptions": ["canary", "full", "rollback"],
+    "mustNotAllowFreeText": true
+  },
+  "state": {
+    "service": "payments-api",
+    "version": "2.14.0",
+    "smoke": "fail"
+  },
+  "response": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "deployStrategy": {
+        "type": "choice",
+        "choice": "rollback",
+        "probabilities": {
+          "canary": 0.04,
+          "full": 0.03,
+          "rollback": 0.93
+        },
+        "confidence": 0.91
+      }
+    },
+    "usage": {
+      "input_tokens": 356,
+      "output_tokens": 28
+    }
+  }
+}

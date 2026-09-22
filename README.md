@@ -124,8 +124,11 @@ When `jev-latest` moves to a new release, answers can shift without code changes
 | 16 | **Error paths** (401, 422, 429, missing key) | SDK + raw client | `tests/errors.test.ts` |
 | 17 | **Raw HTTP client** | `lib/client/raw-fetch-client.ts` | `tests/raw-fetch.test.ts` |
 | 18 | **E2E CLI triage** | `cli/support-ticket-triage.ts` | `tests/support-ticket-triage.test.ts` |
+| 19 | **Noul hard-fail** (auto-merge, missing blast-radius) | `demos/hard-fail/noul-auto-merge.ts` | `tests/hard-fail/noul-hard-fail.test.ts` |
+| 20 | **Choice hard-fail** (smoke=fail → rollback) | `demos/hard-fail/choice-deploy-strategy.ts` | `tests/hard-fail/choice-hard-fail.test.ts` |
+| 21 | **Score hard-fail** (blast-radius band caps promote) | `demos/hard-fail/score-blast-radius.ts` | `tests/hard-fail/score-hard-fail.test.ts` |
 
-All paths relative to `packages/jev-demo/`. Fixtures under `fixtures/` match the [HTTP API reference](https://docs.typesafe.ai/api).
+All paths relative to `packages/jev-demo/`. Fixtures under `fixtures/` match the [HTTP API reference](https://docs.typesafe.ai/api). Hard-fail goldens live under `fixtures/hard-fail/` with prompt-contract metadata.
 
 ## End-to-end CLI
 
@@ -150,6 +153,17 @@ Handler: billing | Priority: high
 ```
 
 JSON mode: `JSON=1 pnpm demo:triage "..."`.
+
+## Hard-fail goldens (room scenarios)
+
+Locked scenarios beside triage — assert gates block unsafe promotion:
+
+```bash
+pnpm demo:hard-fail          # all three scenarios (fixture-first)
+pnpm demo:hard-fail noul     # auto-merge without blast-radius
+pnpm demo:hard-fail choice   # smoke=fail → rollback
+pnpm demo:hard-fail score    # mid-band blast-radius caps at ask_human
+```
 
 ## Architecture
 
