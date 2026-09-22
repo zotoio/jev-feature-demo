@@ -10,6 +10,11 @@ const jevDemoRoot = path.resolve(packageRoot, "../jev-demo");
 
 export default defineConfig({
   plugins: [react(), typesafeProxyPlugin()],
+  define: {
+    // Prevent bare `process` ReferenceError if a dep touches process.env in the browser.
+    "process.env.TYPESAFE_API_KEY": "undefined",
+    "process.env.TYPESAFE_BASE_URL": "undefined",
+  },
   envDir: workspaceRoot,
   server: {
     port: 5173,
