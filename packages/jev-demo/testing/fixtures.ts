@@ -54,6 +54,17 @@ export function systemOneRoute(fixturePath: string, status = 200): MockRoute {
   };
 }
 
+/** Serve the nested `response` from a hard-fail composite fixture. */
+export function hardFailSystemOneRoute(fixturePath: string, status = 200): MockRoute {
+  const composite = loadFixture<{ response: unknown }>(fixturePath);
+  return {
+    method: "POST",
+    path: SYSTEMONE_PATH,
+    status,
+    body: composite.response,
+  };
+}
+
 export function modelsRoute(fixturePath = "models/list.json"): MockRoute {
   return {
     method: "GET",

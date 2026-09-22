@@ -8,6 +8,7 @@
     "test:watch": "pnpm --filter @zotoio/jev-demo test:watch",
     "test:live": "pnpm --filter @zotoio/jev-demo test:live",
     "demo:triage": "pnpm --filter @zotoio/jev-demo demo:triage",
+    "demo:hard-fail": "pnpm --filter @zotoio/jev-demo demo:hard-fail",
     "build": "pnpm --filter @zotoio/jev-demo build"
   },
   "license": "MIT"

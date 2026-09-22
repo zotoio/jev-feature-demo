@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  capGateOutcome,
   decideFromChoice,
   decideFromNoul,
+  decideFromNoulWithRequiredFacts,
   decideFromScore,
+  DEFAULT_BLAST_RADIUS_SCORE_BANDS,
   noulConfidence,
   routeByConfidence,
 } from "../lib/confidence-gates.js";
@@ -24,5 +27,21 @@ describe("Confidence gates (application code)", () => {
     expect(decideFromNoul(0.99).outcome).toBe("act");
     expect(decideFromChoice("billing", 0.81).outcome).toBe("ask_human");
     expect(decideFromScore(1.05, 0.92).outcome).toBe("act");
+  });
+
+  it("caps gate outcomes for score bands independent of confidence", () => {
+    expect(capGateOutcome("act", "ask_human")).toBe("ask_human");
+    expect(decideFromScore(0.82, 0.94, { scoreBands: DEFAULT_BLAST_RADIUS_SCORE_BANDS }).outcome).toBe(
+      "ask_human",
+    );
+  });
+
+  it("blocks noul act when required facts are missing from state", () => {
+    const decision = decideFromNoulWithRequiredFacts(0.94, {
+      requiredFacts: ["blastRadius"],
+      state: { blastRadius: null },
+    });
+    expect(decision.outcome).not.toBe("act");
+    expect(decision.proposal.missingFacts).toContain("blastRadius");
   });
 });

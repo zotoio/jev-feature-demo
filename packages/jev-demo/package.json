@@ -9,6 +9,7 @@
   "scripts": {
     "build": "tsc --noEmit",
     "demo:triage": "tsx cli/support-ticket-triage.ts",
+    "demo:hard-fail": "tsx cli/hard-fail-demos.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:live": "tsx scripts/test-live.ts"
