@@ -15,7 +15,7 @@ export function SessionPanel() {
   const [statusMessage, setStatusMessage] = useState("");
 
   useEffect(() => {
-    if (session.sessionKey) setKeyInput(session.sessionKey);
+    setKeyInput(session.sessionKey ?? "");
   }, [session.sessionKey]);
 
   async function checkConnection() {

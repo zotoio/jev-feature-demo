@@ -60,7 +60,11 @@ export function ScenariosPanel() {
               key={item.id}
               type="button"
               className={item.id === selectedId ? "active" : ""}
-              onClick={() => setSelectedId(item.id)}
+              onClick={() => {
+                setSelectedId(item.id);
+                setOutput(null);
+                setError(null);
+              }}
             >
               <span className="scenario-label">{item.label}</span>
               <span className="scenario-category">{item.category}</span>
