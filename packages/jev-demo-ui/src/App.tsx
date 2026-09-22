@@ -4,6 +4,7 @@ import { PlaygroundPanel } from "./components/PlaygroundPanel.js";
 import { RawPanel } from "./components/RawPanel.js";
 import { ScenariosPanel } from "./components/ScenariosPanel.js";
 import { SessionPanel } from "./components/SessionPanel.js";
+import { describeAuthSource } from "./lib/auth-resolution.js";
 import { SessionProvider, useSession } from "./session/SessionContext.js";
 
 function AppContent() {
@@ -11,10 +12,11 @@ function AppContent() {
   const session = useSession();
 
   const modeLabel = session.isLive
-    ? `Live · ${session.resolvedModelId}`
-    : session.fixtureMode
-      ? "Fixture mode"
-      : "No API key — fixture fallback";
+    ? `Live · ${session.resolvedModelId} · ${session.liveSource === "session" ? "session override" : ".env proxy"}`
+    : describeAuthSource({
+        mode: "fixture",
+        reason: session.fixtureModeForced ? "forced" : "no-key",
+      });
 
   return (
     <Layout activeTab={activeTab} onTabChange={setActiveTab} modeLabel={modeLabel}>

@@ -2,13 +2,13 @@ import { useState } from "react";
 import { createUiClient } from "../lib/client.js";
 import { evaluateAnswerGates } from "../lib/gate-display.js";
 import { SCENARIOS, scenarioFixturePreview, type ScenarioDefinition } from "../lib/scenarios.js";
-import { useSession } from "../session/SessionContext.js";
+import { useUiClientOptions } from "../session/useUiClientOptions.js";
 import { GateOutcomeCard } from "./GateOutcomeCard.js";
 import { PromoteAction } from "./PromoteAction.js";
 import { RawJson } from "./RawJson.js";
 
 export function ScenariosPanel() {
-  const session = useSession();
+  const clientOptions = useUiClientOptions(SCENARIOS[0].fixtureId);
   const [selectedId, setSelectedId] = useState(SCENARIOS[0].id);
   const [output, setOutput] = useState<unknown>(null);
   const [error, setError] = useState<string | null>(null);
@@ -23,10 +23,8 @@ export function ScenariosPanel() {
 
     try {
       const client = createUiClient({
-        apiKey: session.apiKey,
-        fixtureMode: session.fixtureMode,
+        ...clientOptions,
         fixtureId: target.fixtureId,
-        defaultModel: session.resolvedModelId,
       });
 
       const result = await target.run(client);

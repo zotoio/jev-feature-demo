@@ -3,9 +3,11 @@ import { JEV_LATEST, JEV_PINNED } from "@zotoio/jev-demo";
 import { createUiClient, describeConnection } from "../lib/client.js";
 import { maskApiKey } from "../session/session-storage.js";
 import { useSession } from "../session/SessionContext.js";
+import { useUiClientOptions } from "../session/useUiClientOptions.js";
 
 export function SessionPanel() {
   const session = useSession();
+  const clientOptions = useUiClientOptions("models-list");
   const [keyInput, setKeyInput] = useState("");
   const [connectionStatus, setConnectionStatus] = useState<"idle" | "checking" | "ok" | "error">(
     "idle",
@@ -13,32 +15,22 @@ export function SessionPanel() {
   const [statusMessage, setStatusMessage] = useState("");
 
   useEffect(() => {
-    if (session.apiKey) setKeyInput(session.apiKey);
-  }, [session.apiKey]);
+    if (session.sessionKey) setKeyInput(session.sessionKey);
+  }, [session.sessionKey]);
 
   async function checkConnection() {
     setConnectionStatus("checking");
     setStatusMessage("");
 
     try {
-      const client = createUiClient({
-        apiKey: session.apiKey,
-        fixtureMode: session.fixtureMode,
-        fixtureId: "models-list",
-        defaultModel: session.resolvedModelId,
-      });
-
+      const client = createUiClient(clientOptions);
       const models = await client.models.list();
-      const mode = describeConnection({
-        apiKey: session.apiKey,
-        fixtureMode: session.fixtureMode,
-        fixtureId: "models-list",
-      });
+      const mode = describeConnection(clientOptions);
 
       setConnectionStatus("ok");
       setStatusMessage(
-        mode === "live"
-          ? `Live — ${models.models.length} models available`
+        session.isLive
+          ? `${mode} — ${models.models.length} models available`
           : `Fixture mode — ${models.models.length} models from golden fixture`,
       );
     } catch (error) {
@@ -48,31 +40,54 @@ export function SessionPanel() {
   }
 
   function handleSaveKey() {
-    session.setApiKey(keyInput);
+    session.setSessionKey(keyInput);
   }
 
   return (
     <div className="panel">
       <header className="panel-header">
         <h2>Session</h2>
-        <p>API keys stay on your machine (localhost only). Never committed or logged.</p>
+        <p>Preferred local setup: gitignored <code>.env</code> read by the dev server only.</p>
       </header>
 
+      <section className="card info-card">
+        <h3>API key resolution order</h3>
+        <ol>
+          <li>
+            <strong>Session override</strong> (optional paste below — this tab only)
+          </li>
+          <li>
+            <strong>Server <code>.env</code></strong> via localhost proxy
+            {session.serverConfigLoaded ? (
+              session.serverKeyConfigured ? " — configured" : " — not configured"
+            ) : (
+              " — checking…"
+            )}
+          </li>
+          <li>
+            <strong>Fixture / demo mode</strong> when neither is available
+          </li>
+        </ol>
+      </section>
+
       <section className="card">
-        <h3>API key</h3>
-        <label htmlFor="api-key">TypeSafe API key</label>
+        <h3>Session override (optional)</h3>
+        <p className="hint">
+          Temporary key for this browser tab. Never written to <code>.env</code> or any file.
+        </p>
+        <label htmlFor="api-key">TypeSafe API key override</label>
         <div className="row">
           <input
             id="api-key"
             type="password"
             autoComplete="off"
             spellCheck={false}
-            placeholder="sk-… (optional — fixture mode works without a key)"
+            placeholder="sk-… (optional — leave empty to use .env)"
             value={keyInput}
             onChange={(e) => setKeyInput(e.target.value)}
           />
           <button type="button" className="primary" onClick={handleSaveKey}>
-            Save key
+            Save override
           </button>
         </div>
 
@@ -82,21 +97,25 @@ export function SessionPanel() {
             checked={session.persistKeyInTab}
             onChange={(e) => session.setPersistKeyInTab(e.target.checked)}
           />
-          Keep for this browser tab (sessionStorage only — cleared when tab closes)
+          Keep override for this browser tab (sessionStorage only — cleared when tab closes)
         </label>
 
-        {session.hasKey && (
+        {session.hasSessionOverride && (
           <p className="hint">
-            Active key: {maskApiKey(session.apiKey!)} — stored in memory
+            Active override: {maskApiKey(session.sessionKey!)} — stored in memory
             {session.persistKeyInTab ? " + sessionStorage" : " only"}.
           </p>
         )}
 
         <div className="row">
           <button type="button" className="danger" onClick={session.clearSession}>
-            Clear key / lock session
+            Clear session override
           </button>
         </div>
+        <p className="hint">
+          Clear session wipes the tab override only. It does not change your gitignored{" "}
+          <code>.env</code>.
+        </p>
       </section>
 
       <section className="card">
@@ -104,16 +123,14 @@ export function SessionPanel() {
         <label className="checkbox">
           <input
             type="checkbox"
-            checked={session.fixtureMode}
-            onChange={(e) => session.setFixtureMode(e.target.checked)}
+            checked={session.fixtureModeForced}
+            onChange={(e) => session.setFixtureModeForced(e.target.checked)}
           />
-          Fixture mode (offline golden responses — works with zero API key)
+          Force fixture mode (offline golden responses — ignores keys)
         </label>
 
         <p className="status-line">
-          Mode:{" "}
-          <strong>{session.isLive ? "Live API" : "Fixture / demo"}</strong>
-          {session.fixtureMode && " — toggle off + save key for live calls"}
+          Mode: <strong>{describeConnection(clientOptions)}</strong>
         </p>
 
         <fieldset>
@@ -154,9 +171,13 @@ export function SessionPanel() {
       <section className="card info-card">
         <h3>Security model</h3>
         <ul>
-          <li>Keys are held in React memory; optional sessionStorage for tab lifetime only.</li>
-          <li>Never localStorage, never written to .env, never in URLs or logs.</li>
-          <li>Use Clear key to wipe memory and sessionStorage immediately.</li>
+          <li>
+            Preferred: copy <code>.env.example</code> to <code>.env</code> with{" "}
+            <code>TYPESAFE_API_KEY</code> — read only by the Vite dev server proxy.
+          </li>
+          <li>No <code>VITE_</code> prefix — the key is never baked into the client bundle.</li>
+          <li>Session override: React memory + optional sessionStorage (tab lifetime only).</li>
+          <li>Never <code>localStorage</code>, never written to <code>.env</code>, never logged.</li>
           <li>This UI is for localhost exploration — do not deploy with user key entry.</li>
         </ul>
       </section>

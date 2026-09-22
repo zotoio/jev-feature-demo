@@ -4,21 +4,36 @@ import {
   createTypeSafeClient,
   RawTypeSafeClient,
 } from "@zotoio/jev-demo";
+import { PROXY_BASE_PATH, SERVER_PROXY_SENTINEL } from "../../server/constants.js";
+import { describeAuthSource, resolveAuth, type ResolvedAuth } from "./auth-resolution.js";
 import { fixtureToRoutes } from "./fixtures.js";
 
 export interface UiClientOptions {
-  apiKey?: string | null;
-  fixtureMode: boolean;
+  sessionKey?: string | null;
+  fixtureModeForced: boolean;
+  serverKeyConfigured: boolean;
   fixtureId: string;
   defaultModel?: string;
 }
 
-export function createUiClient(options: UiClientOptions): TypeSafeClient {
-  const useLive = !options.fixtureMode && Boolean(options.apiKey?.trim());
+export function resolveUiAuth(options: UiClientOptions): ResolvedAuth {
+  return resolveAuth({
+    sessionKey: options.sessionKey,
+    fixtureModeForced: options.fixtureModeForced,
+    serverKeyConfigured: options.serverKeyConfigured,
+  });
+}
 
-  if (useLive) {
+export function createUiClient(options: UiClientOptions): TypeSafeClient {
+  const auth = resolveUiAuth(options);
+
+  if (auth.mode === "live") {
+    const apiKey =
+      auth.source === "session" ? auth.sessionKey! : SERVER_PROXY_SENTINEL;
+
     return createTypeSafeClient({
-      apiKey: options.apiKey!.trim(),
+      apiKey,
+      baseURL: PROXY_BASE_PATH,
       defaultModel: options.defaultModel,
       logLevel: "warn",
       dangerouslyAllowBrowser: true,
@@ -34,11 +49,15 @@ export function createUiClient(options: UiClientOptions): TypeSafeClient {
 }
 
 export function createUiRawClient(options: UiClientOptions): RawTypeSafeClient {
-  const useLive = !options.fixtureMode && Boolean(options.apiKey?.trim());
+  const auth = resolveUiAuth(options);
 
-  if (useLive) {
+  if (auth.mode === "live") {
+    const apiKey =
+      auth.source === "session" ? auth.sessionKey! : SERVER_PROXY_SENTINEL;
+
     return new RawTypeSafeClient({
-      apiKey: options.apiKey!.trim(),
+      apiKey,
+      baseURL: PROXY_BASE_PATH,
     });
   }
 
@@ -49,6 +68,6 @@ export function createUiRawClient(options: UiClientOptions): RawTypeSafeClient {
   });
 }
 
-export function describeConnection(options: UiClientOptions): "live" | "fixture" {
-  return !options.fixtureMode && Boolean(options.apiKey?.trim()) ? "live" : "fixture";
+export function describeConnection(options: UiClientOptions): string {
+  return describeAuthSource(resolveUiAuth(options));
 }

@@ -195,7 +195,8 @@ legend {
   margin-bottom: 1rem;
 }
 
-.info-card ul {
+.info-card ul,
+.info-card ol {
   margin: 0;
   padding-left: 1.2rem;
 }

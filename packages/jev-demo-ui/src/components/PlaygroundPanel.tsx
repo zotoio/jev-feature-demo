@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createUiClient } from "../lib/client.js";
+import { createUiClient, resolveUiAuth } from "../lib/client.js";
 import { evaluateAnswerGates } from "../lib/gate-display.js";
 import {
   createEmptyQuestion,
@@ -8,14 +8,14 @@ import {
   type PlaygroundConfig,
   type PlaygroundQuestion,
 } from "../lib/playground.js";
-import { useSession } from "../session/SessionContext.js";
+import { useUiClientOptions } from "../session/useUiClientOptions.js";
 import { GateOutcomeCard } from "./GateOutcomeCard.js";
 import { PromoteAction } from "./PromoteAction.js";
 import { ResultSummary } from "./ResultSummary.js";
 import { RawJson } from "./RawJson.js";
 
 export function PlaygroundPanel() {
-  const session = useSession();
+  const clientOptions = useUiClientOptions("noul-simple");
   const [config, setConfig] = useState<PlaygroundConfig>(defaultPlaygroundConfig);
   const [fixtureId, setFixtureId] = useState("noul-simple");
   const [result, setResult] = useState<Record<string, unknown> | null>(null);
@@ -48,14 +48,10 @@ export function PlaygroundPanel() {
     setResult(null);
 
     try {
-      const client = createUiClient({
-        apiKey: session.apiKey,
-        fixtureMode: session.fixtureMode,
-        fixtureId,
-        defaultModel: session.resolvedModelId,
-      });
+      const options = { ...clientOptions, fixtureId };
+      const client = createUiClient(options);
 
-      const response = await runPlayground(client, config, session.resolvedModelId);
+      const response = await runPlayground(client, config, options.defaultModel);
       setResult(response as Record<string, unknown>);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Request failed");
@@ -261,7 +257,7 @@ export function PlaygroundPanel() {
         ))}
       </section>
 
-      {session.fixtureMode && (
+      {resolveUiAuth({ ...clientOptions, fixtureId }).mode === "fixture" && (
         <section className="card">
           <label htmlFor="playground-fixture">Fixture response (offline)</label>
           <select

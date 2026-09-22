@@ -1,31 +1,34 @@
 import { describe, expect, it } from "vitest";
-import { createUiClient, describeConnection } from "../src/lib/client.js";
+import { createUiClient, describeConnection, resolveUiAuth } from "../src/lib/client.js";
 
 describe("UI client factory", () => {
-  it("uses fixture mode when no API key is present", () => {
+  it("falls back to fixture mode when no keys are available", () => {
     expect(
-      describeConnection({
-        apiKey: null,
-        fixtureMode: false,
+      resolveUiAuth({
+        sessionKey: null,
+        fixtureModeForced: false,
+        serverKeyConfigured: false,
         fixtureId: "noul-simple",
-      }),
+      }).mode,
     ).toBe("fixture");
   });
 
-  it("uses live mode only when key is present and fixture mode is off", () => {
+  it("uses live mode via server env proxy when configured", () => {
     expect(
       describeConnection({
-        apiKey: "sk-test",
-        fixtureMode: false,
+        sessionKey: null,
+        fixtureModeForced: false,
+        serverKeyConfigured: true,
         fixtureId: "noul-simple",
       }),
-    ).toBe("live");
+    ).toContain(".env");
   });
 
   it("returns fixture responses offline", async () => {
     const client = createUiClient({
-      apiKey: null,
-      fixtureMode: true,
+      sessionKey: null,
+      fixtureModeForced: true,
+      serverKeyConfigured: false,
       fixtureId: "noul-simple",
     });
 

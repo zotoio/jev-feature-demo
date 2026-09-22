@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { noul } from "@typesafe-ai/sdk";
 import { RawTypeSafeHttpError } from "@zotoio/jev-demo";
-import { createUiClient, createUiRawClient } from "../lib/client.js";
+import { createUiClient, createUiRawClient, resolveUiAuth } from "../lib/client.js";
 import { useSession } from "../session/SessionContext.js";
+import { useUiClientOptions } from "../session/useUiClientOptions.js";
 import { RawJson } from "./RawJson.js";
 
 type ClientMode = "sdk" | "raw";
@@ -11,6 +12,7 @@ export function RawPanel() {
   const session = useSession();
   const [clientMode, setClientMode] = useState<ClientMode>("sdk");
   const [fixtureId, setFixtureId] = useState("noul-simple");
+  const clientOptions = useUiClientOptions(fixtureId);
   const [stateText, setStateText] = useState(
     "I was charged twice for my subscription. Please refund one charge today.",
   );
@@ -20,6 +22,7 @@ export function RawPanel() {
   const [loading, setLoading] = useState(false);
 
   const question = { billing: noul("Is this about billing?") };
+  const usesFixtures = resolveUiAuth(clientOptions).mode === "fixture";
 
   async function handleRun() {
     setLoading(true);
@@ -35,20 +38,11 @@ export function RawPanel() {
 
     try {
       if (clientMode === "sdk") {
-        const client = createUiClient({
-          apiKey: session.apiKey,
-          fixtureMode: session.fixtureMode,
-          fixtureId,
-          defaultModel: session.resolvedModelId,
-        });
+        const client = createUiClient(clientOptions);
         const result = await client.systemOne(payload);
         setResponse(result);
       } else {
-        const raw = createUiRawClient({
-          apiKey: session.apiKey,
-          fixtureMode: session.fixtureMode,
-          fixtureId,
-        });
+        const raw = createUiRawClient(clientOptions);
         const result = await raw.systemOne(payload);
         setResponse(result);
       }
@@ -68,20 +62,14 @@ export function RawPanel() {
     setLoading(true);
     setError(null);
 
+    const listOptions = { ...clientOptions, fixtureId: "models-list" };
+
     try {
       if (clientMode === "sdk") {
-        const client = createUiClient({
-          apiKey: session.apiKey,
-          fixtureMode: session.fixtureMode,
-          fixtureId: "models-list",
-        });
+        const client = createUiClient(listOptions);
         setResponse(await client.models.list());
       } else {
-        const raw = createUiRawClient({
-          apiKey: session.apiKey,
-          fixtureMode: session.fixtureMode,
-          fixtureId: "models-list",
-        });
+        const raw = createUiRawClient(listOptions);
         setResponse(await raw.listModels());
       }
       setRequestPreview({ method: "GET", path: "/v1/models" });
@@ -122,7 +110,7 @@ export function RawPanel() {
           </label>
         </fieldset>
 
-        {session.fixtureMode && (
+        {usesFixtures && (
           <label htmlFor="raw-fixture">
             Fixture
             <select id="raw-fixture" value={fixtureId} onChange={(e) => setFixtureId(e.target.value)}>
