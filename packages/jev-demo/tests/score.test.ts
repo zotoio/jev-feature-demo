@@ -20,4 +20,15 @@ describe("Score", () => {
     );
     expect(result.decision.outcome).toBe("act");
   });
+
+  it("routes mid-band score confidence to ask_human, not act", async () => {
+    const client = createTypeSafeClient({
+      fetch: createFixtureFetch([systemOneRoute("systemone/score-mid-confidence.json")]),
+    });
+
+    const result = await demoScoreFrustration(client, "Somewhat frustrated message");
+    expect(result.response.answers.frustration.confidence).toBe(0.72);
+    expect(result.decision.outcome).toBe("ask_human");
+    expect(result.decision.outcome).not.toBe("act");
+  });
 });
