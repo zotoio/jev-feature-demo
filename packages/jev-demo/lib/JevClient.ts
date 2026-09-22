@@ -6,8 +6,6 @@ import {
   evaluateWithSdk,
   type DemoClientConfig,
 } from "./client/typesafe-client.js";
-import { JEV_LATEST, JEV_PINNED, TYPESAFE_API_BASE } from "./constants.js";
-
 /**
  * Primary facade for the Jev feature demo.
  * Wraps the official @typesafe-ai/sdk client, raw HTTP client, and demo helpers.
@@ -41,6 +39,7 @@ export {
   RawTypeSafeHttpError,
 };
 export * from "./confidence-gates.js";
-export { JEV_LATEST, JEV_PINNED, TYPESAFE_API_BASE };
+export { createFixtureFetch, systemOneRoute, modelsRoute, type MockRoute } from "./fixture-fetch.js";
+export { JEV_LATEST, JEV_PINNED, TYPESAFE_API_BASE, MODELS_PATH, SYSTEMONE_PATH } from "./constants.js";
 
 export type { DemoClientConfig, TypeSafeClientConfig };

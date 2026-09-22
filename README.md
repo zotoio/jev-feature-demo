@@ -18,7 +18,47 @@ packages/jev-demo/
   fixtures/             # golden API responses (offline CI)
   tests/                # Vitest matrix (fixture-first)
   scripts/test-live.ts  # optional live smoke (TYPESAFE_API_KEY)
+packages/jev-demo-ui/   # local web playground (thin client over jev-demo lib)
 ```
+
+## Local UI
+
+A browser playground for every Jev surface — no CLI required for exploration.
+
+```bash
+pnpm install
+pnpm ui            # http://localhost:5173
+```
+
+| Panel | What it covers |
+|-------|----------------|
+| **Session** | API key entry, model select (`jev-latest` / pinned), connection test, clear session |
+| **Playground** | Build Noul / Choice / Score (and batch), edit state shapes, run, gate outcomes |
+| **Scenarios** | One-click hard-fail goldens + triage demos from fixtures |
+| **Raw / Advanced** | SDK vs raw HTTP twin parity, request/response viewer |
+
+### API key setup (preferred → optional override)
+
+**Preferred for local runs:** copy `.env.example` to `.env` or `.env.local` (both gitignored) and set `TYPESAFE_API_KEY`. The Vite dev server reads it and proxies live calls through `localhost` — the key is **never** baked into the client bundle (no `VITE_` prefix).
+
+**Optional session override:** paste a key in the Session panel for a temporary tab-only override (React memory + optional `sessionStorage`). The UI **never writes** to `.env` or any file. **Clear session override** wipes the tab override only — it does not delete `.env`.
+
+**Live mode resolution order:**
+
+1. Session UI override (this tab)
+2. Server `.env` / `.env.local` via dev-server proxy
+3. Fixture / demo mode (zero key — CI and first-run)
+
+Toggle **Force fixture mode** in Session to use offline goldens even when a key is available.
+
+### API key security (localhost only)
+
+- `.env` / `.env.local`: read by the **Vite/Node dev server only**; proxied to Typesafe without embedding in static assets.
+- Session override: password-style input; memory + optional `sessionStorage` (tab lifetime).
+- **Never** `localStorage`, never `VITE_*` env vars, never logged, never in URLs.
+- Jev proposes; the UI **never auto-executes side effects** — gate decisions are shown and “Simulate promote” requires an explicit click.
+
+Do not deploy this UI to production with user key entry; it is for local exploration on `localhost` only.
 
 ## Requirements
 
@@ -42,7 +82,7 @@ export TYPESAFE_API_KEY="sk-..."
 pnpm test:live     # hits https://api.typesafe.ai — skipped if key unset
 ```
 
-Copy `.env.example` to `.env` for local development if your shell loads it.
+Copy `.env.example` to `.env` or `.env.local` for local development (`pnpm ui` proxy and `pnpm test:live`).
 
 ## Pin vs latest
 

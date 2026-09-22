@@ -4,12 +4,13 @@
   "description": "Typesafe.ai Jev (System One) feature demo monorepo",
   "packageManager": "pnpm@10.33.3",
   "scripts": {
-    "test": "pnpm --filter @zotoio/jev-demo test",
+    "test": "pnpm --filter @zotoio/jev-demo test && pnpm --filter @zotoio/jev-demo-ui test",
     "test:watch": "pnpm --filter @zotoio/jev-demo test:watch",
     "test:live": "pnpm --filter @zotoio/jev-demo test:live",
     "demo:triage": "pnpm --filter @zotoio/jev-demo demo:triage",
     "demo:hard-fail": "pnpm --filter @zotoio/jev-demo demo:hard-fail",
-    "build": "pnpm --filter @zotoio/jev-demo build"
+    "build": "pnpm --filter @zotoio/jev-demo build && pnpm --filter @zotoio/jev-demo-ui build",
+    "ui": "pnpm --filter @zotoio/jev-demo-ui dev"
   },
   "license": "MIT"
 }
