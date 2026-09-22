@@ -1,0 +1,58 @@
+{
+  "model": "jev-1.13.0",
+  "answers": {
+    "category": {
+      "type": "choice",
+      "choice": "billing",
+      "probabilities": {
+        "bug_report": 0.04,
+        "billing": 0.86,
+        "feature_request": 0.05,
+        "other": 0.05
+      },
+      "confidence": 0.84
+    },
+    "bugSeverity": {
+      "type": "score",
+      "score": 0.4,
+      "legend": {
+        "0": "Minor cosmetic",
+        "1": "Functional impact",
+        "2": "Critical outage"
+      },
+      "probabilities": {
+        "0": 0.7,
+        "1": 0.25,
+        "2": 0.05
+      },
+      "confidence": 0.55
+    },
+    "hasReproSteps": {
+      "type": "noul",
+      "noul": 0.12
+    },
+    "refundRequested": {
+      "type": "noul",
+      "noul": 0.96
+    },
+    "frustration": {
+      "type": "score",
+      "score": 1.8,
+      "legend": {
+        "0": "Calm",
+        "1": "Frustrated",
+        "2": "Very angry"
+      },
+      "probabilities": {
+        "0": 0.02,
+        "1": 0.28,
+        "2": 0.7
+      },
+      "confidence": 0.91
+    }
+  },
+  "usage": {
+    "input_tokens": 620,
+    "output_tokens": 88
+  }
+}
