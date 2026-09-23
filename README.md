@@ -43,7 +43,7 @@ pnpm ui            # http://localhost:5173
 
 **Optional live modes:**
 
-1. **Session override** — paste a key in the Session panel (React memory + optional `sessionStorage` for the tab lifetime). Never written to `.env`.
+1. **Session override** — paste a key in the Session panel (React memory only for this tab; cleared on refresh). Never written to `.env` or browser storage.
 2. **Server `.env` opt-in** — copy `.env.example` to `.env` or `.env.local`, set `TYPESAFE_API_KEY`, then check **Use server `.env` via dev-server proxy** in Session (default off). The key is read only by the Vite dev server proxy — never baked into the client bundle (no `VITE_` prefix).
 
 **Live mode resolution order:**
@@ -58,7 +58,7 @@ Toggle **Force fixture mode** in Session to use offline goldens even when keys a
 ### API key security (localhost only)
 
 - `.env` / `.env.local`: read by the **Vite/Node dev server only**; proxied to Typesafe without embedding in static assets.
-- Session override: password-style input; memory + optional `sessionStorage` (tab lifetime).
+- Session override: password-style input; React memory only (not persisted to browser storage).
 - **Never** `localStorage`, never `VITE_*` env vars, never logged, never in URLs.
 - Jev proposes; the UI **never auto-executes side effects** — gate decisions are shown and “Simulate promote” requires an explicit click.
 

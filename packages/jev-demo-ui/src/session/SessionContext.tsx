@@ -10,13 +10,12 @@ import {
 import { JEV_LATEST, JEV_PINNED } from "@zotoio/jev-demo";
 import { PROXY_CONFIG_PATH } from "../../server/constants.js";
 import { resolveAuth, type LiveAuthSource, type ResolvedMode } from "../lib/auth-resolution.js";
-import { clearPersistedApiKey, hasNonEmptyKey, persistApiKey } from "./session-storage.js";
+import { hasNonEmptyKey } from "./session-storage.js";
 
 export type ModelChoice = "jev-latest" | "jev-pinned";
 
 export interface SessionState {
   sessionKey: string | null;
-  persistKeyInTab: boolean;
   fixtureModeForced: boolean;
   useServerEnv: boolean;
   serverKeyConfigured: boolean;
@@ -29,7 +28,6 @@ export interface SessionState {
   liveSource?: LiveAuthSource;
   isLive: boolean;
   setSessionKey: (key: string) => void;
-  setPersistKeyInTab: (persist: boolean) => void;
   setFixtureModeForced: (enabled: boolean) => void;
   setUseServerEnv: (enabled: boolean) => void;
   setModel: (model: ModelChoice) => void;
@@ -62,7 +60,6 @@ async function fetchServerConfig(): Promise<ServerConfig> {
 
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [sessionKey, setSessionKeyState] = useState<string | null>(null);
-  const [persistKeyInTab, setPersistKeyInTabState] = useState(false);
   const [fixtureModeForced, setFixtureModeForced] = useState(false);
   const [useServerEnv, setUseServerEnv] = useState(false);
   const [serverKeyConfigured, setServerKeyConfigured] = useState(false);
@@ -84,34 +81,13 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     }
   }, [devProxyAvailable, useServerEnv]);
 
-  const setSessionKey = useCallback(
-    (key: string) => {
-      const trimmed = key.trim();
-      setSessionKeyState(trimmed || null);
-      if (persistKeyInTab && trimmed) {
-        persistApiKey(trimmed);
-      } else {
-        clearPersistedApiKey();
-      }
-    },
-    [persistKeyInTab],
-  );
-
-  const setPersistKeyInTab = useCallback(
-    (persist: boolean) => {
-      setPersistKeyInTabState(persist);
-      if (persist && sessionKey) {
-        persistApiKey(sessionKey);
-      } else {
-        clearPersistedApiKey();
-      }
-    },
-    [sessionKey],
-  );
+  const setSessionKey = useCallback((key: string) => {
+    const trimmed = key.trim();
+    setSessionKeyState(trimmed || null);
+  }, []);
 
   const clearSession = useCallback(() => {
     setSessionKeyState(null);
-    clearPersistedApiKey();
   }, []);
 
   const hasSessionOverride = hasNonEmptyKey(sessionKey);
@@ -126,7 +102,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       sessionKey,
-      persistKeyInTab,
       fixtureModeForced,
       useServerEnv,
       serverKeyConfigured,
@@ -138,7 +113,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       liveSource: auth.source,
       isLive: auth.mode === "live",
       setSessionKey,
-      setPersistKeyInTab,
       setFixtureModeForced,
       setUseServerEnv,
       setModel,
@@ -147,7 +121,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     }),
     [
       sessionKey,
-      persistKeyInTab,
       fixtureModeForced,
       useServerEnv,
       serverKeyConfigured,
@@ -158,7 +131,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       auth.mode,
       auth.source,
       setSessionKey,
-      setPersistKeyInTab,
       clearSession,
       resolvedModelId,
     ],

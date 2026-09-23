@@ -56,8 +56,9 @@ export function SessionPanel() {
         <h2>Session</h2>
         <p>
           <strong>Fixture mode is the default.</strong> Paste your Typesafe API key below to enable
-          live mode for this tab only. The key stays in memory unless you opt in to tab
-          persistence — never <code>localStorage</code>, disk, or <code>.env</code>.
+          live mode for this tab only. The key stays in React memory only — cleared on refresh or
+          when you clear session; never <code>localStorage</code>, <code>sessionStorage</code>, disk,
+          or <code>.env</code>.
         </p>
       </header>
 
@@ -98,8 +99,8 @@ export function SessionPanel() {
           <a href="https://console.typesafe.ai/settings/keys" target="_blank" rel="noreferrer">
             TypeSafe Console
           </a>
-          . Stored in React state (memory) by default — cleared when you close the tab or click
-          Clear session.
+          . Stored in React memory only — cleared on refresh or when you click Clear session. Never
+          written to browser storage, disk, or <code>.env</code>.
         </p>
         <label htmlFor="api-key">TypeSafe API key</label>
         <div className="row">
@@ -117,20 +118,10 @@ export function SessionPanel() {
           </button>
         </div>
 
-        <label className="checkbox">
-          <input
-            type="checkbox"
-            checked={session.persistKeyInTab}
-            onChange={(e) => session.setPersistKeyInTab(e.target.checked)}
-          />
-          Also keep key in sessionStorage for this tab (opt-in — default off; survives refresh
-          within the same tab only)
-        </label>
-
         {session.hasSessionOverride && (
           <p className="hint">
-            Active key: {maskApiKey(session.sessionKey!)} — in memory
-            {session.persistKeyInTab ? " + sessionStorage" : " only"}.
+            Active key: {maskApiKey(session.sessionKey!)} — stored in React memory only (lost on
+            refresh).
           </p>
         )}
 
@@ -139,9 +130,7 @@ export function SessionPanel() {
             Clear session
           </button>
         </div>
-        <p className="hint">
-          Clear session wipes the pasted key from memory{session.persistKeyInTab ? " and sessionStorage" : ""}.
-        </p>
+        <p className="hint">Clear session wipes the pasted key from memory.</p>
       </section>
 
       <section className="card">
@@ -228,9 +217,12 @@ export function SessionPanel() {
         <ul>
           <li>Fixture mode is default — no key required to explore the demo.</li>
           <li>
-            Session keys live in React state (memory). Optional sessionStorage is opt-in and tab-only.
+            Session keys live in React memory only — not persisted to browser storage or disk.
           </li>
-          <li>Never <code>localStorage</code>, never written to <code>.env</code>, never logged.</li>
+          <li>
+            Never <code>sessionStorage</code>, <code>localStorage</code>, or written to{" "}
+            <code>.env</code>; never logged.
+          </li>
           <li>No <code>VITE_</code> prefix — keys are never baked into the static build.</li>
           {session.devProxyAvailable && (
             <li>

@@ -1,8 +1,9 @@
 import { renderHook, act } from "@testing-library/react";
 import { describe, expect, it, afterEach, vi } from "vitest";
-import { SESSION_STORAGE_KEY } from "../src/session/session-storage.js";
-import { SessionProvider, useSession } from "../src/session/SessionContext.js";
 import type { ReactNode } from "react";
+import { SessionProvider, useSession } from "../src/session/SessionContext.js";
+
+const SESSION_STORAGE_KEY = "jev-demo-api-key";
 
 function wrapper({ children }: { children: ReactNode }) {
   return <SessionProvider>{children}</SessionProvider>;
@@ -27,6 +28,21 @@ describe("SessionProvider", () => {
     expect(result.current.authMode).toBe("fixture");
     expect(result.current.devProxyAvailable).toBe(false);
     expect(localStorage.getItem(SESSION_STORAGE_KEY)).toBeNull();
+  });
+
+  it("does not restore keys from sessionStorage on mount", async () => {
+    sessionStorage.setItem(SESSION_STORAGE_KEY, "sk-stale-from-storage");
+    vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("no proxy"));
+
+    const { result } = renderHook(() => useSession(), { wrapper });
+
+    await vi.waitFor(() => {
+      expect(result.current.serverConfigLoaded).toBe(true);
+    });
+
+    expect(result.current.sessionKey).toBeNull();
+    expect(result.current.hasSessionOverride).toBe(false);
+    expect(sessionStorage.getItem(SESSION_STORAGE_KEY)).toBe("sk-stale-from-storage");
   });
 
   it("enters live mode with direct session key and clears on clearSession", async () => {
@@ -57,7 +73,7 @@ describe("SessionProvider", () => {
     expect(sessionStorage.getItem(SESSION_STORAGE_KEY)).toBeNull();
   });
 
-  it("does not persist session key unless opt-in", async () => {
+  it("does not write session keys to sessionStorage", async () => {
     vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("no proxy"));
 
     const { result } = renderHook(() => useSession(), { wrapper });
@@ -70,12 +86,7 @@ describe("SessionProvider", () => {
       result.current.setSessionKey("sk-memory-only");
     });
 
+    expect(result.current.sessionKey).toBe("sk-memory-only");
     expect(sessionStorage.getItem(SESSION_STORAGE_KEY)).toBeNull();
-
-    act(() => {
-      result.current.setPersistKeyInTab(true);
-    });
-
-    expect(sessionStorage.getItem(SESSION_STORAGE_KEY)).toBe("sk-memory-only");
   });
 });

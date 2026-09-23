@@ -1,21 +1,7 @@
-/** Session-only API key storage — never localStorage. */
+/** Legacy sessionStorage key — kept for tests only; API keys are memory-only. */
 export const SESSION_STORAGE_KEY = "jev-demo-api-key";
 
-export function readPersistedApiKey(): string | null {
-  try {
-    return sessionStorage.getItem(SESSION_STORAGE_KEY);
-  } catch {
-    return null;
-  }
-}
-
-export function persistApiKey(key: string): void {
-  sessionStorage.setItem(SESSION_STORAGE_KEY, key);
-}
-
-export function clearPersistedApiKey(): void {
-  sessionStorage.removeItem(SESSION_STORAGE_KEY);
-}
+/** Session key helpers — memory-only; never localStorage or sessionStorage. */
 
 export function hasNonEmptyKey(key: string | null | undefined): boolean {
   return Boolean(key?.trim());
