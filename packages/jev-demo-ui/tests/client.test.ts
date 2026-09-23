@@ -2,22 +2,24 @@ import { describe, expect, it } from "vitest";
 import { createUiClient, describeConnection, resolveUiAuth } from "../src/lib/client.js";
 
 describe("UI client factory", () => {
-  it("falls back to fixture mode when no keys are available", () => {
+  it("defaults to fixture mode when server env is configured but not opted in", () => {
     expect(
       resolveUiAuth({
         sessionKey: null,
         fixtureModeForced: false,
-        serverKeyConfigured: false,
+        useServerEnv: false,
+        serverKeyConfigured: true,
         fixtureId: "noul-simple",
       }).mode,
     ).toBe("fixture");
   });
 
-  it("uses live mode via server env proxy when configured", () => {
+  it("uses live mode via server env proxy only when opted in", () => {
     expect(
       describeConnection({
         sessionKey: null,
         fixtureModeForced: false,
+        useServerEnv: true,
         serverKeyConfigured: true,
         fixtureId: "noul-simple",
       }),
@@ -28,6 +30,7 @@ describe("UI client factory", () => {
     const client = createUiClient({
       sessionKey: null,
       fixtureModeForced: true,
+      useServerEnv: false,
       serverKeyConfigured: false,
       fixtureId: "noul-simple",
     });

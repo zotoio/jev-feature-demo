@@ -16,11 +16,11 @@
     "answers": {
       "deployStrategy": {
         "type": "choice",
-        "choice": "rollback",
+        "choice": "full",
         "probabilities": {
           "canary": 0.04,
-          "full": 0.03,
-          "rollback": 0.93
+          "full": 0.91,
+          "rollback": 0.05
         },
         "confidence": 0.91
       }

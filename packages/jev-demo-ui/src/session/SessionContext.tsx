@@ -23,6 +23,7 @@ export interface SessionState {
   sessionKey: string | null;
   persistKeyInTab: boolean;
   fixtureModeForced: boolean;
+  useServerEnv: boolean;
   serverKeyConfigured: boolean;
   serverConfigLoaded: boolean;
   model: ModelChoice;
@@ -33,6 +34,7 @@ export interface SessionState {
   setSessionKey: (key: string) => void;
   setPersistKeyInTab: (persist: boolean) => void;
   setFixtureModeForced: (enabled: boolean) => void;
+  setUseServerEnv: (enabled: boolean) => void;
   setModel: (model: ModelChoice) => void;
   clearSession: () => void;
   resolvedModelId: string;
@@ -55,6 +57,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [sessionKey, setSessionKeyState] = useState<string | null>(() => readPersistedApiKey());
   const [persistKeyInTab, setPersistKeyInTabState] = useState(() => Boolean(readPersistedApiKey()));
   const [fixtureModeForced, setFixtureModeForced] = useState(false);
+  const [useServerEnv, setUseServerEnv] = useState(false);
   const [serverKeyConfigured, setServerKeyConfigured] = useState(false);
   const [serverConfigLoaded, setServerConfigLoaded] = useState(false);
   const [model, setModel] = useState<ModelChoice>("jev-latest");
@@ -100,6 +103,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const auth = resolveAuth({
     sessionKey,
     fixtureModeForced,
+    useServerEnv,
     serverKeyConfigured,
   });
   const resolvedModelId = model === "jev-latest" ? JEV_LATEST : JEV_PINNED;
@@ -109,6 +113,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       sessionKey,
       persistKeyInTab,
       fixtureModeForced,
+      useServerEnv,
       serverKeyConfigured,
       serverConfigLoaded,
       model,
@@ -119,6 +124,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       setSessionKey,
       setPersistKeyInTab,
       setFixtureModeForced,
+      setUseServerEnv,
       setModel,
       clearSession,
       resolvedModelId,
@@ -127,6 +133,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       sessionKey,
       persistKeyInTab,
       fixtureModeForced,
+      useServerEnv,
       serverKeyConfigured,
       serverConfigLoaded,
       model,

@@ -34,22 +34,26 @@ pnpm ui            # http://localhost:5173
 |-------|----------------|
 | **Session** | API key entry, model select (`jev-latest` / pinned), connection test, clear session |
 | **Playground** | Build Noul / Choice / Score (and batch), edit state shapes, run, gate outcomes |
-| **Scenarios** | One-click hard-fail goldens + triage demos from fixtures |
+| **Scenarios** | Three hard-fail explorers (proposal \| gate \| prompt contract) + goldens + triage |
 | **Raw / Advanced** | SDK vs raw HTTP twin parity, request/response viewer |
 
-### API key setup (preferred → optional override)
+### API key setup (fixture-default → optional live)
 
-**Preferred for local runs:** copy `.env.example` to `.env` or `.env.local` (both gitignored) and set `TYPESAFE_API_KEY`. The Vite dev server reads it and proxies live calls through `localhost` — the key is **never** baked into the client bundle (no `VITE_` prefix).
+**Fixture mode is the default.** Presence of a server `.env` or `TYPESAFE_API_KEY` does **not** auto-enable live mode. The published GitHub Pages site is fixture-only with live mode off by default.
 
-**Optional session override:** paste a key in the Session panel for a temporary tab-only override (React memory + optional `sessionStorage`). The UI **never writes** to `.env` or any file. **Clear session override** wipes the tab override only — it does not delete `.env`.
+**Optional live modes:**
+
+1. **Session override** — paste a key in the Session panel (React memory + optional `sessionStorage` for the tab lifetime). Never written to `.env`.
+2. **Server `.env` opt-in** — copy `.env.example` to `.env` or `.env.local`, set `TYPESAFE_API_KEY`, then check **Use server `.env` via dev-server proxy** in Session (default off). The key is read only by the Vite dev server proxy — never baked into the client bundle (no `VITE_` prefix).
 
 **Live mode resolution order:**
 
-1. Session UI override (this tab)
-2. Server `.env` / `.env.local` via dev-server proxy
-3. Fixture / demo mode (zero key — CI and first-run)
+1. Force fixture (explicit toggle — ignores all keys)
+2. Session UI override (this tab)
+3. Server `.env` via dev-server proxy — only when opted in
+4. Fixture / demo mode (default)
 
-Toggle **Force fixture mode** in Session to use offline goldens even when a key is available.
+Toggle **Force fixture mode** in Session to use offline goldens even when keys are available.
 
 ### API key security (localhost only)
 
@@ -154,9 +158,22 @@ Handler: billing | Priority: high
 
 JSON mode: `JSON=1 pnpm demo:triage "..."`.
 
-## Hard-fail goldens (room scenarios)
+## Hard-fail explorers (room scenarios)
 
-Locked scenarios beside triage — assert gates block unsafe promotion:
+Three one-click explorers in the **Scenarios** panel — each shows **proposal | gate | prompt contract** side-by-side (fixture-backed, no live key required):
+
+| Explorer | What to verify |
+|----------|----------------|
+| **Noul missing blastRadius** | `missingFacts` includes `blastRadius`; gate outcome ≠ `act`; contract shows propose-only + `blast-radius` hook |
+| **Choice smoke=fail → rollback** | Model proposes `full`; promote rolls back to `rollback`; contract shows locked `{canary, full, rollback}` |
+| **Score auth band → ask_human** | Confidence-only would `act`; banded gate = `ask_human`; contract shows `0.7–0.9` band anchors |
+
+```bash
+pnpm ui                        # open http://localhost:5173 → Scenarios tab
+# Select an explorer, click "Run scenario" — panels populate side-by-side
+```
+
+CLI parity (same fixtures + `lib/confidence-gates` helpers):
 
 ```bash
 pnpm demo:hard-fail          # all three scenarios (fixture-first)
@@ -164,6 +181,13 @@ pnpm demo:hard-fail noul     # auto-merge without blast-radius
 pnpm demo:hard-fail choice   # smoke=fail → rollback
 pnpm demo:hard-fail score    # mid-band blast-radius caps at ask_human
 ```
+
+### GitHub Pages (fixture-only publish)
+
+Static build deploys via `.github/workflows/deploy-gh-pages.yml` on push to `main`:
+
+- `VITE_BASE_PATH=/jev-feature-demo/` for asset paths
+- No Actions secrets / `TYPESAFE_API_KEY` — fixture mode only on the published site
 
 ## Architecture
 

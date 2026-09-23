@@ -19,7 +19,7 @@ describe("Choice hard-fail (deploy strategy with smoke=fail)", () => {
     assertPromptContract(fixture.promptContract, buildDeployStrategyQuestions(), JEV_SYSTEM_CONTRACT);
   });
 
-  it("selects rollback when smoke=fail is a first-class state field", async () => {
+  it("rolls back to rollback via promote when smoke=fail", async () => {
     const client = createTypeSafeClient({
       fetch: createFixtureFetch([hardFailSystemOneRoute(FIXTURE_PATH)]),
     });
@@ -29,7 +29,11 @@ describe("Choice hard-fail (deploy strategy with smoke=fail)", () => {
     const result = await demoChoiceDeployHardFail(client, fixture.state);
 
     expect(result.smokeFailRequiresRollback).toBe(true);
+    expect(result.proposedChoice).toBe("full");
+    expect(result.promotion.rolledBack).toBe(true);
+    expect(result.promotion.choice).toBe("rollback");
     expect(result.decision.proposal.choice).toBe("rollback");
+    expect(result.decision.outcome).not.toBe("act");
     expect(result.lockedOptions).toEqual(["canary", "full", "rollback"]);
     const deployAnswer = result.response.answers.deployStrategy;
     expect(deployAnswer.type).toBe("choice");

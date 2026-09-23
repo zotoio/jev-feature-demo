@@ -2,11 +2,26 @@ import { describe, expect, it } from "vitest";
 import { resolveAuth } from "../src/lib/auth-resolution.js";
 
 describe("auth resolution order", () => {
-  it("uses session override before server env", () => {
+  it("defaults to fixture mode even when server env is configured", () => {
+    expect(
+      resolveAuth({
+        sessionKey: null,
+        fixtureModeForced: false,
+        useServerEnv: false,
+        serverKeyConfigured: true,
+      }),
+    ).toEqual({
+      mode: "fixture",
+      reason: "no-key",
+    });
+  });
+
+  it("uses session override before server env opt-in", () => {
     expect(
       resolveAuth({
         sessionKey: "sk-session",
         fixtureModeForced: false,
+        useServerEnv: true,
         serverKeyConfigured: true,
       }),
     ).toEqual({
@@ -16,11 +31,12 @@ describe("auth resolution order", () => {
     });
   });
 
-  it("uses server env when no session override", () => {
+  it("uses server env only when explicitly opted in", () => {
     expect(
       resolveAuth({
         sessionKey: null,
         fixtureModeForced: false,
+        useServerEnv: true,
         serverKeyConfigured: true,
       }),
     ).toEqual({
@@ -34,6 +50,7 @@ describe("auth resolution order", () => {
       resolveAuth({
         sessionKey: null,
         fixtureModeForced: false,
+        useServerEnv: false,
         serverKeyConfigured: false,
       }),
     ).toEqual({
@@ -47,6 +64,7 @@ describe("auth resolution order", () => {
       resolveAuth({
         sessionKey: "sk-session",
         fixtureModeForced: true,
+        useServerEnv: true,
         serverKeyConfigured: true,
       }),
     ).toEqual({

@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { createUiClient } from "../lib/client.js";
 import { evaluateAnswerGates } from "../lib/gate-display.js";
+import type { HardFailExplorerPanels } from "../lib/hard-fail-explorers.js";
 import { SCENARIOS, scenarioFixturePreview, type ScenarioDefinition } from "../lib/scenarios.js";
 import { useUiClientOptions } from "../session/useUiClientOptions.js";
 import { GateOutcomeCard } from "./GateOutcomeCard.js";
+import { HardFailExplorer } from "./HardFailExplorer.js";
 import { PromoteAction } from "./PromoteAction.js";
 import { RawJson } from "./RawJson.js";
 
@@ -11,6 +13,7 @@ export function ScenariosPanel() {
   const clientOptions = useUiClientOptions(SCENARIOS[0].fixtureId);
   const [selectedId, setSelectedId] = useState(SCENARIOS[0].id);
   const [output, setOutput] = useState<unknown>(null);
+  const [explorerPanels, setExplorerPanels] = useState<HardFailExplorerPanels | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -20,6 +23,7 @@ export function ScenariosPanel() {
     setLoading(true);
     setError(null);
     setOutput(null);
+    setExplorerPanels(null);
 
     try {
       const client = createUiClient({
@@ -28,7 +32,11 @@ export function ScenariosPanel() {
       });
 
       const result = await target.run(client);
-      setOutput(result);
+      if (target.isExplorer) {
+        setExplorerPanels(result as HardFailExplorerPanels);
+      } else {
+        setOutput(result);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Scenario failed");
     } finally {
@@ -50,7 +58,10 @@ export function ScenariosPanel() {
     <div className="panel">
       <header className="panel-header">
         <h2>Scenarios</h2>
-        <p>One-click hard-fail goldens and triage demos from existing fixtures.</p>
+        <p>
+          Hard-fail explorers (proposal | gate | prompt contract) plus one-click goldens and triage
+          demos — all fixture-backed by default.
+        </p>
       </header>
 
       <div className="scenario-layout">
@@ -108,6 +119,10 @@ export function ScenariosPanel() {
           />
 
           {error && <p className="error" role="alert">{error}</p>}
+
+          {explorerPanels != null ? (
+            <HardFailExplorer panels={explorerPanels} />
+          ) : null}
 
           {output != null ? (
             <>

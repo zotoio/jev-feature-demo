@@ -13,14 +13,17 @@ export interface ResolvedAuth {
 export interface AuthResolutionInput {
   sessionKey?: string | null;
   fixtureModeForced: boolean;
+  /** Explicit opt-in to use server .env via dev-server proxy (default off). */
+  useServerEnv: boolean;
   serverKeyConfigured: boolean;
 }
 
 /**
  * Live mode resolution order:
- * 1. Session UI override (this tab only)
- * 2. Server env from .env / .env.local (dev-server proxy)
- * 3. Fixture / demo mode
+ * 1. Force fixture (explicit toggle — ignores all keys)
+ * 2. Session UI override (this tab only)
+ * 3. Server env from .env / .env.local — only when useServerEnv is opted in
+ * 4. Fixture / demo mode (default)
  */
 export function resolveAuth(input: AuthResolutionInput): ResolvedAuth {
   if (input.fixtureModeForced) {
@@ -35,7 +38,7 @@ export function resolveAuth(input: AuthResolutionInput): ResolvedAuth {
     };
   }
 
-  if (input.serverKeyConfigured) {
+  if (input.useServerEnv && input.serverKeyConfigured) {
     return { mode: "live", source: "server-env" };
   }
 
@@ -44,10 +47,10 @@ export function resolveAuth(input: AuthResolutionInput): ResolvedAuth {
 
 export function describeAuthSource(auth: ResolvedAuth): string {
   if (auth.mode === "fixture") {
-    return auth.reason === "forced" ? "Fixture mode (forced)" : "Fixture mode";
+    return auth.reason === "forced" ? "Fixture mode (forced)" : "Fixture mode (default)";
   }
 
   return auth.source === "session"
     ? "Live API (session override)"
-    : "Live API (.env via dev-server proxy)";
+    : "Live API (.env via dev-server proxy — opted in)";
 }

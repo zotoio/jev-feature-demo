@@ -16,13 +16,16 @@ import structuredInstructions from "../../../jev-demo/fixtures/systemone/structu
 import error401 from "../../../jev-demo/fixtures/errors/401-unauthorized.json";
 import error422 from "../../../jev-demo/fixtures/errors/422-validation.json";
 import error429 from "../../../jev-demo/fixtures/errors/429-rate-limit.json";
+import choiceDeploySmokeFail from "../../../jev-demo/fixtures/hard-fail/choice-deploy-smoke-fail.json";
+import noulAutoMerge from "../../../jev-demo/fixtures/hard-fail/noul-auto-merge.json";
+import scoreBlastRadiusAuth from "../../../jev-demo/fixtures/hard-fail/score-blast-radius-auth.json";
 import modelsList from "../../../jev-demo/fixtures/models/list.json";
 
 export interface FixtureDefinition {
   id: string;
   label: string;
   description: string;
-  category: "primitive" | "state" | "model" | "batch" | "fanout" | "error";
+  category: "primitive" | "state" | "model" | "batch" | "fanout" | "error" | "hard-fail";
   body: unknown;
   status?: number;
   headers?: Record<string, string>;
@@ -146,6 +149,27 @@ export const FIXTURES: FixtureDefinition[] = [
     body: error429,
     status: 429,
     headers: { "retry-after": "2" },
+  },
+  {
+    id: "hard-fail-noul",
+    label: "Hard-fail: Noul auto-merge",
+    description: "Missing blast-radius blocks promotion",
+    category: "hard-fail",
+    body: noulAutoMerge.response,
+  },
+  {
+    id: "hard-fail-choice",
+    label: "Hard-fail: Choice deploy",
+    description: "Smoke=fail rolls back to rollback",
+    category: "hard-fail",
+    body: choiceDeploySmokeFail.response,
+  },
+  {
+    id: "hard-fail-score",
+    label: "Hard-fail: Score blast-radius",
+    description: "Auth band caps at ask_human",
+    category: "hard-fail",
+    body: scoreBlastRadiusAuth.response,
   },
 ];
 

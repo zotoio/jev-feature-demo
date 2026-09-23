@@ -11,6 +11,7 @@ import { fixtureToRoutes } from "./fixtures.js";
 export interface UiClientOptions {
   sessionKey?: string | null;
   fixtureModeForced: boolean;
+  useServerEnv: boolean;
   serverKeyConfigured: boolean;
   fixtureId: string;
   defaultModel?: string;
@@ -20,6 +21,7 @@ export function resolveUiAuth(options: UiClientOptions): ResolvedAuth {
   return resolveAuth({
     sessionKey: options.sessionKey,
     fixtureModeForced: options.fixtureModeForced,
+    useServerEnv: options.useServerEnv,
     serverKeyConfigured: options.serverKeyConfigured,
   });
 }
