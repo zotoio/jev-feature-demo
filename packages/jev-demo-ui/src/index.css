@@ -1,5 +1,5 @@
 :root {
-  color-scheme: light dark;
+  color-scheme: dark;
 
   /* Surfaces */
   --bg: #0f1419;
@@ -249,6 +249,20 @@ legend {
   gap: 1rem;
   align-items: flex-start;
   margin-bottom: 1rem;
+}
+
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.theme-toggle {
+  white-space: nowrap;
+  font-size: 0.9rem;
+  padding: 0.35rem 0.75rem;
 }
 
 .app-header p {
@@ -558,8 +572,8 @@ code {
   }
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
+html[data-theme="light"] {
+  color-scheme: light;
     --bg: #f4f7fb;
     --bg-elevated: #ffffff;
     --bg-card: #ffffff;
@@ -601,8 +615,7 @@ code {
     --focus-ring: #1a5a96;
     --focus-ring-offset: #f4f7fb;
 
-    background: radial-gradient(circle at top, #e8eef5 0%, var(--bg) 55%);
-  }
+  background: radial-gradient(circle at top, #e8eef5 0%, var(--bg) 55%);
 }
 
 @media (forced-colors: active) {

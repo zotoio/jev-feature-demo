@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ThemeToggle } from "./ThemeToggle.js";
 
 export type TabId = "session" | "playground" | "scenarios" | "raw";
 
@@ -25,9 +26,12 @@ export function Layout({ activeTab, onTabChange, children, modeLabel }: LayoutPr
           <h1>Jev Playground</h1>
           <p>Typesafe System One — explorer for Noul, Choice, Score, gates, and fixtures.</p>
         </div>
-        <div className="mode-pill" role="status" aria-live="polite">
-          <span className="visually-hidden">Current mode: </span>
-          {modeLabel}
+        <div className="header-actions">
+          <ThemeToggle />
+          <div className="mode-pill" role="status" aria-live="polite">
+            <span className="visually-hidden">Current mode: </span>
+            {modeLabel}
+          </div>
         </div>
       </header>
 

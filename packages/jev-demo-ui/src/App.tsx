@@ -6,6 +6,7 @@ import { ScenariosPanel } from "./components/ScenariosPanel.js";
 import { SessionPanel } from "./components/SessionPanel.js";
 import { describeAuthSource } from "./lib/auth-resolution.js";
 import { SessionProvider, useSession } from "./session/SessionContext.js";
+import { ThemeProvider } from "./theme/ThemeContext.js";
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState<TabId>("playground");
@@ -30,8 +31,10 @@ function AppContent() {
 
 export function App() {
   return (
-    <SessionProvider>
-      <AppContent />
-    </SessionProvider>
+    <ThemeProvider>
+      <SessionProvider>
+        <AppContent />
+      </SessionProvider>
+    </ThemeProvider>
   );
 }
