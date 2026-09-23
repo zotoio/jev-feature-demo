@@ -19,7 +19,7 @@ export function GateOutcomeCard({ results }: GateOutcomeCardProps) {
               <span className="gate-type">{result.type}</span>
             </div>
             <p>{result.summary}</p>
-            <p className="gate-outcome" aria-label={`Gate outcome for ${result.key}`}>
+            <p className="gate-outcome-badge" aria-label={`Gate outcome for ${result.key}`}>
               {gateOutcomeLabel(result.decision.outcome)}
             </p>
             <p className="gate-confidence">Confidence: {result.confidence.toFixed(2)}</p>
