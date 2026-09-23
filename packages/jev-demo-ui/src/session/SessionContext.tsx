@@ -10,12 +10,7 @@ import {
 import { JEV_LATEST, JEV_PINNED } from "@zotoio/jev-demo";
 import { PROXY_CONFIG_PATH } from "../../server/constants.js";
 import { resolveAuth, type LiveAuthSource, type ResolvedMode } from "../lib/auth-resolution.js";
-import {
-  clearPersistedApiKey,
-  hasNonEmptyKey,
-  persistApiKey,
-  readPersistedApiKey,
-} from "./session-storage.js";
+import { clearPersistedApiKey, hasNonEmptyKey, persistApiKey } from "./session-storage.js";
 
 export type ModelChoice = "jev-latest" | "jev-pinned";
 
@@ -26,6 +21,8 @@ export interface SessionState {
   useServerEnv: boolean;
   serverKeyConfigured: boolean;
   serverConfigLoaded: boolean;
+  /** True when the Vite dev-server proxy is reachable (localhost / preview). */
+  devProxyAvailable: boolean;
   model: ModelChoice;
   hasSessionOverride: boolean;
   authMode: ResolvedMode;
@@ -42,32 +39,50 @@ export interface SessionState {
 
 const SessionContext = createContext<SessionState | null>(null);
 
-async function fetchServerConfig(): Promise<boolean> {
+interface ServerConfig {
+  serverKeyConfigured: boolean;
+  devProxyAvailable: boolean;
+}
+
+async function fetchServerConfig(): Promise<ServerConfig> {
   try {
     const response = await fetch(PROXY_CONFIG_PATH);
-    if (!response.ok) return false;
+    if (!response.ok) {
+      return { serverKeyConfigured: false, devProxyAvailable: false };
+    }
     const data = (await response.json()) as { serverKeyConfigured?: boolean };
-    return Boolean(data.serverKeyConfigured);
+    return {
+      serverKeyConfigured: Boolean(data.serverKeyConfigured),
+      devProxyAvailable: true,
+    };
   } catch {
-    return false;
+    return { serverKeyConfigured: false, devProxyAvailable: false };
   }
 }
 
 export function SessionProvider({ children }: { children: ReactNode }) {
-  const [sessionKey, setSessionKeyState] = useState<string | null>(() => readPersistedApiKey());
-  const [persistKeyInTab, setPersistKeyInTabState] = useState(() => Boolean(readPersistedApiKey()));
+  const [sessionKey, setSessionKeyState] = useState<string | null>(null);
+  const [persistKeyInTab, setPersistKeyInTabState] = useState(false);
   const [fixtureModeForced, setFixtureModeForced] = useState(false);
   const [useServerEnv, setUseServerEnv] = useState(false);
   const [serverKeyConfigured, setServerKeyConfigured] = useState(false);
   const [serverConfigLoaded, setServerConfigLoaded] = useState(false);
+  const [devProxyAvailable, setDevProxyAvailable] = useState(false);
   const [model, setModel] = useState<ModelChoice>("jev-latest");
 
   useEffect(() => {
-    void fetchServerConfig().then((configured) => {
-      setServerKeyConfigured(configured);
+    void fetchServerConfig().then((config) => {
+      setServerKeyConfigured(config.serverKeyConfigured);
+      setDevProxyAvailable(config.devProxyAvailable);
       setServerConfigLoaded(true);
     });
   }, []);
+
+  useEffect(() => {
+    if (!devProxyAvailable && useServerEnv) {
+      setUseServerEnv(false);
+    }
+  }, [devProxyAvailable, useServerEnv]);
 
   const setSessionKey = useCallback(
     (key: string) => {
@@ -116,6 +131,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       useServerEnv,
       serverKeyConfigured,
       serverConfigLoaded,
+      devProxyAvailable,
       model,
       hasSessionOverride,
       authMode: auth.mode,
@@ -136,6 +152,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       useServerEnv,
       serverKeyConfigured,
       serverConfigLoaded,
+      devProxyAvailable,
       model,
       hasSessionOverride,
       auth.mode,

@@ -4,9 +4,9 @@ import {
   createTypeSafeClient,
   RawTypeSafeClient,
 } from "@zotoio/jev-demo";
-import { PROXY_BASE_PATH, SERVER_PROXY_SENTINEL } from "../../server/constants.js";
 import { describeAuthSource, resolveAuth, type ResolvedAuth } from "./auth-resolution.js";
 import { fixtureToRoutes } from "./fixtures.js";
+import { resolveLiveClientConfig } from "./live-client-config.js";
 
 export interface UiClientOptions {
   sessionKey?: string | null;
@@ -30,12 +30,11 @@ export function createUiClient(options: UiClientOptions): TypeSafeClient {
   const auth = resolveUiAuth(options);
 
   if (auth.mode === "live") {
-    const apiKey =
-      auth.source === "session" ? auth.sessionKey! : SERVER_PROXY_SENTINEL;
+    const { apiKey, baseURL } = resolveLiveClientConfig(auth);
 
     return createTypeSafeClient({
       apiKey,
-      baseURL: PROXY_BASE_PATH,
+      baseURL,
       defaultModel: options.defaultModel,
       logLevel: "warn",
       dangerouslyAllowBrowser: true,
@@ -54,12 +53,11 @@ export function createUiRawClient(options: UiClientOptions): RawTypeSafeClient {
   const auth = resolveUiAuth(options);
 
   if (auth.mode === "live") {
-    const apiKey =
-      auth.source === "session" ? auth.sessionKey! : SERVER_PROXY_SENTINEL;
+    const { apiKey, baseURL } = resolveLiveClientConfig(auth);
 
     return new RawTypeSafeClient({
       apiKey,
-      baseURL: PROXY_BASE_PATH,
+      baseURL,
     });
   }
 
