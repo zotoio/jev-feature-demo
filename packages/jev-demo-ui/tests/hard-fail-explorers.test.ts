@@ -6,6 +6,7 @@ describe("hard-fail explorers", () => {
   const clientOptions = {
     sessionKey: null,
     fixtureModeForced: false,
+    devProxyAvailable: false,
     useServerEnv: false,
     serverKeyConfigured: true,
   };

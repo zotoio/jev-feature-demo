@@ -3,6 +3,14 @@ import { TYPESAFE_API_BASE } from "../server/constants.js";
 import { createUiClient, describeConnection, resolveUiAuth } from "../src/lib/client.js";
 import { resolveLiveClientConfig } from "../src/lib/live-client-config.js";
 
+const localDev = {
+  devProxyAvailable: true,
+};
+
+const staticPublish = {
+  devProxyAvailable: false,
+};
+
 describe("UI client factory", () => {
   it("defaults to fixture mode when server env is configured but not opted in", () => {
     expect(
@@ -12,6 +20,7 @@ describe("UI client factory", () => {
         useServerEnv: false,
         serverKeyConfigured: true,
         fixtureId: "noul-simple",
+        ...localDev,
       }).mode,
     ).toBe("fixture");
   });
@@ -24,17 +33,19 @@ describe("UI client factory", () => {
         useServerEnv: true,
         serverKeyConfigured: true,
         fixtureId: "noul-simple",
+        ...localDev,
       }),
     ).toContain(".env");
   });
 
-  it("routes session keys to direct Typesafe API in prod/static builds", () => {
+  it("routes session keys to direct Typesafe API on localhost", () => {
     const auth = resolveUiAuth({
-      sessionKey: "sk-pages-live",
+      sessionKey: "sk-local-live",
       fixtureModeForced: false,
       useServerEnv: false,
       serverKeyConfigured: false,
       fixtureId: "noul-simple",
+      ...localDev,
     });
 
     expect(auth.mode).toBe("live");
@@ -42,7 +53,23 @@ describe("UI client factory", () => {
 
     const liveConfig = resolveLiveClientConfig(auth);
     expect(liveConfig.baseURL).toBe(TYPESAFE_API_BASE);
-    expect(liveConfig.apiKey).toBe("sk-pages-live");
+    expect(liveConfig.apiKey).toBe("sk-local-live");
+  });
+
+  it("stays in fixture mode on static publish even with a session key", () => {
+    expect(
+      resolveUiAuth({
+        sessionKey: "sk-session",
+        fixtureModeForced: false,
+        useServerEnv: false,
+        serverKeyConfigured: false,
+        fixtureId: "noul-simple",
+        ...staticPublish,
+      }),
+    ).toEqual({
+      mode: "fixture",
+      reason: "no-key",
+    });
   });
 
   it("returns fixture responses offline", async () => {
@@ -51,6 +78,7 @@ describe("UI client factory", () => {
       fixtureModeForced: true,
       useServerEnv: false,
       serverKeyConfigured: false,
+      devProxyAvailable: false,
       fixtureId: "noul-simple",
     });
 

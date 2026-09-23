@@ -7,6 +7,7 @@ export function useUiClientOptions(fixtureId: string) {
     fixtureModeForced: session.fixtureModeForced,
     useServerEnv: session.useServerEnv,
     serverKeyConfigured: session.serverKeyConfigured,
+    devProxyAvailable: session.devProxyAvailable,
     fixtureId,
     defaultModel: session.resolvedModelId,
   };

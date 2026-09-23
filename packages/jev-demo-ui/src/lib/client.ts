@@ -13,6 +13,7 @@ export interface UiClientOptions {
   fixtureModeForced: boolean;
   useServerEnv: boolean;
   serverKeyConfigured: boolean;
+  devProxyAvailable: boolean;
   fixtureId: string;
   defaultModel?: string;
 }
@@ -23,6 +24,7 @@ export function resolveUiAuth(options: UiClientOptions): ResolvedAuth {
     fixtureModeForced: options.fixtureModeForced,
     useServerEnv: options.useServerEnv,
     serverKeyConfigured: options.serverKeyConfigured,
+    devProxyAvailable: options.devProxyAvailable,
   });
 }
 

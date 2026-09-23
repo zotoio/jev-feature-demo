@@ -72,6 +72,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       setServerKeyConfigured(config.serverKeyConfigured);
       setDevProxyAvailable(config.devProxyAvailable);
       setServerConfigLoaded(true);
+
+      if (!config.devProxyAvailable) {
+        setSessionKeyState(null);
+        setUseServerEnv(false);
+      }
     });
   }, []);
 
@@ -81,10 +86,15 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     }
   }, [devProxyAvailable, useServerEnv]);
 
-  const setSessionKey = useCallback((key: string) => {
-    const trimmed = key.trim();
-    setSessionKeyState(trimmed || null);
-  }, []);
+  const setSessionKey = useCallback(
+    (key: string) => {
+      if (!devProxyAvailable) return;
+
+      const trimmed = key.trim();
+      setSessionKeyState(trimmed || null);
+    },
+    [devProxyAvailable],
+  );
 
   const clearSession = useCallback(() => {
     setSessionKeyState(null);
@@ -96,6 +106,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     fixtureModeForced,
     useServerEnv,
     serverKeyConfigured,
+    devProxyAvailable,
   });
   const resolvedModelId = model === "jev-latest" ? JEV_LATEST : JEV_PINNED;
 

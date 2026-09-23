@@ -16,6 +16,8 @@ export interface AuthResolutionInput {
   /** Explicit opt-in to use server .env via dev-server proxy (default off). */
   useServerEnv: boolean;
   serverKeyConfigured: boolean;
+  /** False on static GitHub Pages — no Vite dev-server proxy; live mode is disabled. */
+  devProxyAvailable: boolean;
 }
 
 /**
@@ -28,6 +30,10 @@ export interface AuthResolutionInput {
 export function resolveAuth(input: AuthResolutionInput): ResolvedAuth {
   if (input.fixtureModeForced) {
     return { mode: "fixture", reason: "forced" };
+  }
+
+  if (!input.devProxyAvailable) {
+    return { mode: "fixture", reason: "no-key" };
   }
 
   if (hasNonEmptyKey(input.sessionKey)) {

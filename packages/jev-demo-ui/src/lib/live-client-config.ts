@@ -11,7 +11,7 @@ export interface LiveClientConfig {
 }
 
 /**
- * Session keys call Typesafe directly (GitHub Pages / static builds have no Vite proxy).
+ * Session keys call Typesafe directly from localhost (live mode is disabled on static publish).
  * Server .env opt-in uses the dev-server proxy on localhost only.
  */
 export function resolveLiveClientConfig(auth: ResolvedAuth): LiveClientConfig {

@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { resolveAuth } from "../src/lib/auth-resolution.js";
 
+const localDev = {
+  devProxyAvailable: true,
+};
+
+const staticPublish = {
+  devProxyAvailable: false,
+};
+
 describe("auth resolution order", () => {
   it("defaults to fixture mode even when server env is configured", () => {
     expect(
@@ -9,6 +17,7 @@ describe("auth resolution order", () => {
         fixtureModeForced: false,
         useServerEnv: false,
         serverKeyConfigured: true,
+        ...localDev,
       }),
     ).toEqual({
       mode: "fixture",
@@ -23,6 +32,7 @@ describe("auth resolution order", () => {
         fixtureModeForced: false,
         useServerEnv: true,
         serverKeyConfigured: true,
+        ...localDev,
       }),
     ).toEqual({
       mode: "live",
@@ -38,6 +48,7 @@ describe("auth resolution order", () => {
         fixtureModeForced: false,
         useServerEnv: true,
         serverKeyConfigured: true,
+        ...localDev,
       }),
     ).toEqual({
       mode: "live",
@@ -52,6 +63,7 @@ describe("auth resolution order", () => {
         fixtureModeForced: false,
         useServerEnv: false,
         serverKeyConfigured: false,
+        ...localDev,
       }),
     ).toEqual({
       mode: "fixture",
@@ -66,10 +78,41 @@ describe("auth resolution order", () => {
         fixtureModeForced: true,
         useServerEnv: true,
         serverKeyConfigured: true,
+        ...localDev,
       }),
     ).toEqual({
       mode: "fixture",
       reason: "forced",
+    });
+  });
+
+  it("ignores session keys on static publish builds", () => {
+    expect(
+      resolveAuth({
+        sessionKey: "sk-session",
+        fixtureModeForced: false,
+        useServerEnv: false,
+        serverKeyConfigured: false,
+        ...staticPublish,
+      }),
+    ).toEqual({
+      mode: "fixture",
+      reason: "no-key",
+    });
+  });
+
+  it("ignores server env opt-in on static publish builds", () => {
+    expect(
+      resolveAuth({
+        sessionKey: null,
+        fixtureModeForced: false,
+        useServerEnv: true,
+        serverKeyConfigured: true,
+        ...staticPublish,
+      }),
+    ).toEqual({
+      mode: "fixture",
+      reason: "no-key",
     });
   });
 });
