@@ -1,5 +1,9 @@
 import type { EntryType, TypeSafeClient } from "@typesafe-ai/sdk";
-import { decideFromChoice, type Decision } from "../../lib/confidence-gates.js";
+import {
+  promoteChoiceWithSmoke,
+  type ChoicePromotion,
+  type Decision,
+} from "../../lib/confidence-gates.js";
 import {
   buildDeployStrategyQuestions,
   DEPLOY_STRATEGY_OPTIONS,
@@ -17,6 +21,8 @@ export interface DeployStrategyDemoResult {
   systemContract: string;
   lockedOptions: readonly string[];
   response: Awaited<ReturnType<TypeSafeClient["systemOne"]>>;
+  proposedChoice: DeployStrategy;
+  promotion: ChoicePromotion<DeployStrategy>;
   decision: Decision<{ choice: DeployStrategy }>;
   smokeFailRequiresRollback: boolean;
 }
@@ -32,13 +38,22 @@ export async function demoChoiceDeployHardFail(
   });
 
   const answer = response.answers.deployStrategy;
-  const choice = answer.choice as DeployStrategy;
+  const proposedChoice = answer.choice as DeployStrategy;
+  const smokePass = state.smoke !== "fail";
+  const promotion = promoteChoiceWithSmoke(
+    proposedChoice,
+    answer.confidence,
+    smokePass,
+    "rollback",
+  );
 
   return {
     systemContract: JEV_SYSTEM_CONTRACT,
     lockedOptions: DEPLOY_STRATEGY_OPTIONS,
     response,
-    decision: decideFromChoice(choice, answer.confidence),
+    proposedChoice,
+    promotion,
+    decision: promotion.decision,
     smokeFailRequiresRollback: state.smoke === "fail",
   };
 }

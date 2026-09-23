@@ -9,6 +9,7 @@ const workspaceRoot = path.resolve(packageRoot, "../..");
 const jevDemoRoot = path.resolve(packageRoot, "../jev-demo");
 
 export default defineConfig({
+  base: process.env.VITE_BASE_PATH ?? "/",
   plugins: [react(), typesafeProxyPlugin()],
   envDir: workspaceRoot,
   server: {

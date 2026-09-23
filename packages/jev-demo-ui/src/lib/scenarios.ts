@@ -17,6 +17,7 @@ import {
   demoStructuredInstructions,
 } from "../../../jev-demo/demos/state-shapes.js";
 import { triageSupportTicket } from "../../../jev-demo/demos/support-ticket-triage.js";
+import { HARD_FAIL_EXPLORERS } from "./hard-fail-explorers.js";
 import { getFixture } from "./fixtures.js";
 
 export interface ScenarioDefinition {
@@ -24,17 +25,30 @@ export interface ScenarioDefinition {
   label: string;
   description: string;
   fixtureId: string;
-  category: "golden" | "triage" | "error";
+  category: "explorer" | "golden" | "triage" | "error";
   sampleState?: string;
   promptContract?: string;
   hardFailChecks?: string[];
   run: (client: TypeSafeClient) => Promise<unknown>;
+  isExplorer?: boolean;
 }
 
 const billingTicket =
   "URGENT: charged twice for my subscription — refund one charge today";
 
+const explorerScenarios: ScenarioDefinition[] = HARD_FAIL_EXPLORERS.map((explorer) => ({
+  id: explorer.id,
+  label: explorer.label,
+  description: explorer.description,
+  fixtureId: explorer.fixtureId,
+  category: explorer.category,
+  hardFailChecks: explorer.hardFailChecks,
+  isExplorer: true,
+  run: explorer.run,
+}));
+
 export const SCENARIOS: ScenarioDefinition[] = [
+  ...explorerScenarios,
   {
     id: "golden-noul",
     label: "Golden: Noul refund",

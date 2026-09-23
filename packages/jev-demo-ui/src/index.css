@@ -360,6 +360,25 @@ legend {
   text-transform: uppercase;
 }
 
+.explorer-triple {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.explorer-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.85rem;
+  min-width: 0;
+}
+
+.explorer-panel h4 {
+  margin-bottom: 0.35rem;
+}
+
 .promote-card .success {
   margin-top: 0.75rem;
 }
@@ -373,6 +392,10 @@ code {
 
 @media (max-width: 800px) {
   .scenario-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .explorer-triple {
     grid-template-columns: 1fr;
   }
 
