@@ -68,7 +68,7 @@ describe("UI client factory", () => {
       }),
     ).toEqual({
       mode: "fixture",
-      reason: "no-key",
+      reason: "static-publish",
     });
   });
 

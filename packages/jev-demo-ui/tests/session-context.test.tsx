@@ -26,6 +26,7 @@ describe("SessionProvider", () => {
 
     expect(result.current.devProxyAvailable).toBe(false);
     expect(result.current.authMode).toBe("fixture");
+    expect(result.current.fixtureModeForced).toBe(true);
     expect(result.current.sessionKey).toBeNull();
     expect(localStorage.getItem(SESSION_STORAGE_KEY)).toBeNull();
   });

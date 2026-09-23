@@ -76,6 +76,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       if (!config.devProxyAvailable) {
         setSessionKeyState(null);
         setUseServerEnv(false);
+        setFixtureModeForced(true);
       }
     });
   }, []);
@@ -92,6 +93,22 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
       const trimmed = key.trim();
       setSessionKeyState(trimmed || null);
+    },
+    [devProxyAvailable],
+  );
+
+  const setFixtureModeForcedSafe = useCallback(
+    (enabled: boolean) => {
+      if (!devProxyAvailable) return;
+      setFixtureModeForced(enabled);
+    },
+    [devProxyAvailable],
+  );
+
+  const setUseServerEnvSafe = useCallback(
+    (enabled: boolean) => {
+      if (!devProxyAvailable) return;
+      setUseServerEnv(enabled);
     },
     [devProxyAvailable],
   );
@@ -124,8 +141,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       liveSource: auth.source,
       isLive: auth.mode === "live",
       setSessionKey,
-      setFixtureModeForced,
-      setUseServerEnv,
+      setFixtureModeForced: setFixtureModeForcedSafe,
+      setUseServerEnv: setUseServerEnvSafe,
       setModel,
       clearSession,
       resolvedModelId,
@@ -142,6 +159,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       auth.mode,
       auth.source,
       setSessionKey,
+      setFixtureModeForcedSafe,
+      setUseServerEnvSafe,
       clearSession,
       resolvedModelId,
     ],

@@ -14,11 +14,14 @@ export function SessionPanel() {
   );
   const [statusMessage, setStatusMessage] = useState("");
 
-  const isStaticSite = session.serverConfigLoaded && !session.devProxyAvailable;
+  const allowLiveMode = session.devProxyAvailable;
+  const isPublishedDemo = session.serverConfigLoaded && !session.devProxyAvailable;
 
   useEffect(() => {
-    setKeyInput(session.sessionKey ?? "");
-  }, [session.sessionKey]);
+    if (allowLiveMode) {
+      setKeyInput(session.sessionKey ?? "");
+    }
+  }, [allowLiveMode, session.sessionKey]);
 
   async function checkConnection() {
     setConnectionStatus("checking");
@@ -49,23 +52,25 @@ export function SessionPanel() {
     <div className="panel">
       <header className="panel-header">
         <h2>Session</h2>
-        {isStaticSite ? (
+        {isPublishedDemo ? (
           <p>
             <strong>Fixture-only demo.</strong> Live API keys are not available on the published
             site — explore offline golden responses here, or run locally with{" "}
             <code>pnpm ui</code> for optional live mode.
           </p>
-        ) : (
+        ) : allowLiveMode ? (
           <p>
             <strong>Fixture mode is the default.</strong> Paste your Typesafe API key below to enable
             live mode for this tab only. The key stays in React memory only — cleared on refresh or
             when you clear session; never <code>localStorage</code>, <code>sessionStorage</code>,
             disk, or <code>.env</code>.
           </p>
+        ) : (
+          <p className="hint">Detecting environment…</p>
         )}
       </header>
 
-      {isStaticSite ? (
+      {isPublishedDemo && (
         <section className="card info-card">
           <h3>Published demo (fixture-only)</h3>
           <p>
@@ -77,7 +82,9 @@ export function SessionPanel() {
             For live Typesafe calls, clone the repo and run <code>pnpm ui</code> on localhost.
           </p>
         </section>
-      ) : (
+      )}
+
+      {allowLiveMode && (
         <>
           <section className="card info-card">
             <h3>API key resolution order</h3>
@@ -146,7 +153,7 @@ export function SessionPanel() {
 
       <section className="card">
         <h3>Connection</h3>
-        {session.devProxyAvailable && (
+        {allowLiveMode && (
           <>
             <label className="checkbox">
               <input
@@ -217,7 +224,7 @@ export function SessionPanel() {
       <section className="card info-card">
         <h3>Security model</h3>
         <ul>
-          {isStaticSite ? (
+          {isPublishedDemo ? (
             <>
               <li>
                 Published demo is fixture-only — no API key paste, no live Typesafe calls from the

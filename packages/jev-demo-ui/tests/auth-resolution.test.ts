@@ -86,6 +86,21 @@ describe("auth resolution order", () => {
     });
   });
 
+  it("prefers static-publish over forced toggle when dev proxy is unavailable", () => {
+    expect(
+      resolveAuth({
+        sessionKey: "sk-session",
+        fixtureModeForced: true,
+        useServerEnv: true,
+        serverKeyConfigured: true,
+        ...staticPublish,
+      }),
+    ).toEqual({
+      mode: "fixture",
+      reason: "static-publish",
+    });
+  });
+
   it("ignores session keys on static publish builds", () => {
     expect(
       resolveAuth({
@@ -97,7 +112,7 @@ describe("auth resolution order", () => {
       }),
     ).toEqual({
       mode: "fixture",
-      reason: "no-key",
+      reason: "static-publish",
     });
   });
 
@@ -112,7 +127,7 @@ describe("auth resolution order", () => {
       }),
     ).toEqual({
       mode: "fixture",
-      reason: "no-key",
+      reason: "static-publish",
     });
   });
 });

@@ -7,7 +7,7 @@ export interface ResolvedAuth {
   mode: ResolvedMode;
   source?: LiveAuthSource;
   sessionKey?: string;
-  reason?: "forced" | "no-key";
+  reason?: "forced" | "no-key" | "static-publish";
 }
 
 export interface AuthResolutionInput {
@@ -22,18 +22,19 @@ export interface AuthResolutionInput {
 
 /**
  * Live mode resolution order:
- * 1. Force fixture (explicit toggle — ignores all keys)
- * 2. Session UI override (this tab only)
- * 3. Server env from .env / .env.local — only when useServerEnv is opted in
- * 4. Fixture / demo mode (default)
+ * 1. Static publish (GitHub Pages — fixture only, no live path)
+ * 2. Force fixture (explicit toggle — ignores all keys)
+ * 3. Session UI override (this tab only)
+ * 4. Server env from .env / .env.local — only when useServerEnv is opted in
+ * 5. Fixture / demo mode (default)
  */
 export function resolveAuth(input: AuthResolutionInput): ResolvedAuth {
-  if (input.fixtureModeForced) {
-    return { mode: "fixture", reason: "forced" };
+  if (!input.devProxyAvailable) {
+    return { mode: "fixture", reason: "static-publish" };
   }
 
-  if (!input.devProxyAvailable) {
-    return { mode: "fixture", reason: "no-key" };
+  if (input.fixtureModeForced) {
+    return { mode: "fixture", reason: "forced" };
   }
 
   if (hasNonEmptyKey(input.sessionKey)) {
@@ -53,6 +54,7 @@ export function resolveAuth(input: AuthResolutionInput): ResolvedAuth {
 
 export function describeAuthSource(auth: ResolvedAuth): string {
   if (auth.mode === "fixture") {
+    if (auth.reason === "static-publish") return "Fixture mode (published demo)";
     return auth.reason === "forced" ? "Fixture mode (forced)" : "Fixture mode (default)";
   }
 

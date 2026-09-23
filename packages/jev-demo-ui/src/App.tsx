@@ -14,10 +14,14 @@ function AppContent() {
 
   const modeLabel = session.isLive
     ? `Live · ${session.resolvedModelId} · ${session.liveSource === "session" ? "session override" : ".env proxy"}`
-    : describeAuthSource({
-        mode: "fixture",
-        reason: session.fixtureModeForced ? "forced" : "no-key",
-      });
+    : describeAuthSource(
+        session.devProxyAvailable
+          ? {
+              mode: "fixture",
+              reason: session.fixtureModeForced ? "forced" : "no-key",
+            }
+          : { mode: "fixture", reason: "static-publish" },
+      );
 
   return (
     <Layout activeTab={activeTab} onTabChange={setActiveTab} modeLabel={modeLabel}>
