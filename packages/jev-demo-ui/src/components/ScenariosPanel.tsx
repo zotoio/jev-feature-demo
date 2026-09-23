@@ -71,6 +71,7 @@ export function ScenariosPanel() {
               key={item.id}
               type="button"
               className={item.id === selectedId ? "active" : ""}
+              aria-current={item.id === selectedId ? "true" : undefined}
               onClick={() => setSelectedId(item.id)}
             >
               <span className="scenario-label">{item.label}</span>

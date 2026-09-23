@@ -19,12 +19,16 @@ const TABS: Array<{ id: TabId; label: string }> = [
 export function Layout({ activeTab, onTabChange, children, modeLabel }: LayoutProps) {
   return (
     <div className="app-shell">
+      <a href="#main-content" className="skip-link">Skip to main content</a>
       <header className="app-header">
         <div>
           <h1>Jev Playground</h1>
-          <p>Typesafe System One — local explorer for Noul, Choice, Score, gates, and fixtures.</p>
+          <p>Typesafe System One — explorer for Noul, Choice, Score, gates, and fixtures.</p>
         </div>
-        <div className="mode-pill" aria-live="polite">{modeLabel}</div>
+        <div className="mode-pill" role="status" aria-live="polite">
+          <span className="visually-hidden">Current mode: </span>
+          {modeLabel}
+        </div>
       </header>
 
       <nav className="tab-nav" aria-label="Main navigation">
@@ -41,7 +45,7 @@ export function Layout({ activeTab, onTabChange, children, modeLabel }: LayoutPr
         ))}
       </nav>
 
-      <main className="app-main">{children}</main>
+      <main id="main-content" className="app-main">{children}</main>
 
       <footer className="app-footer">
         <p>

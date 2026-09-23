@@ -1,20 +1,53 @@
 :root {
   color-scheme: light dark;
+
+  /* Surfaces */
   --bg: #0f1419;
   --bg-elevated: #1a2332;
   --bg-card: #1e2a3a;
-  --border: #2d3f56;
+  --bg-input: #0d1218;
+  --bg-code: #0b1016;
+  --bg-disabled: #243246;
+
+  /* Text — all meet 4.5:1 on their typical surfaces */
   --text: #e8eef7;
-  --text-muted: #9fb0c7;
-  --accent: #5b9fd4;
-  --accent-strong: #3d8fd1;
-  --danger: #e06c75;
-  --success: #7fd992;
-  --warning: #e5c07b;
-  --gate-act: #3fa86b;
-  --gate-ask: #d4a24c;
-  --gate-deny: #d46a6a;
-  --gate-abstain: #8a93a3;
+  --text-label: #e8eef7;
+  --text-muted: #a8b8cc;
+  --text-placeholder: #8fa0b5;
+  --text-disabled: #7a8da6;
+  --text-on-accent: #ffffff;
+
+  /* Borders — 3:1+ against card backgrounds */
+  --border: #5a7595;
+  --border-strong: #7a93ad;
+
+  /* Interactive */
+  --accent: #82b8e8;
+  --accent-strong: #1a5a96;
+  --accent-hover: #9ec9ef;
+  --danger: #f28b93;
+  --danger-border: #f28b93;
+  --success: #8ee0a0;
+  --warning: #f0d08a;
+
+  /* Gate outcomes — border + text + badge background */
+  --gate-act: #4cc27e;
+  --gate-act-text: #b8f0ce;
+  --gate-act-bg: #163528;
+  --gate-ask: #e8b85c;
+  --gate-ask-text: #f5dfa8;
+  --gate-ask-bg: #3a2f14;
+  --gate-deny: #ef8a8a;
+  --gate-deny-text: #ffc8c8;
+  --gate-deny-bg: #3a1c1c;
+  --gate-abstain: #a8b4c4;
+  --gate-abstain-text: #d0d8e4;
+  --gate-abstain-bg: #2a3038;
+
+  /* Focus */
+  --focus-ring: #9ec9ef;
+  --focus-ring-offset: #0f1419;
+
   font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -27,6 +60,17 @@
 
 * {
   box-sizing: border-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 body {
@@ -50,10 +94,25 @@ p {
 
 a {
   color: var(--accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
 }
 
-button, input, select, textarea {
+a:hover {
+  color: var(--accent-hover);
+}
+
+button, input, select, textarea, summary {
   font: inherit;
+}
+
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 button {
@@ -70,28 +129,47 @@ button:hover:not(:disabled) {
 }
 
 button:disabled {
-  opacity: 0.55;
+  background: var(--bg-disabled);
+  border-color: var(--border);
+  color: var(--text-disabled);
   cursor: not-allowed;
 }
 
 button.primary {
   background: var(--accent-strong);
   border-color: var(--accent-strong);
-  color: #fff;
+  color: var(--text-on-accent);
+}
+
+button.primary:hover:not(:disabled) {
+  border-color: var(--accent-hover);
+  filter: brightness(1.08);
 }
 
 button.danger {
-  border-color: var(--danger);
+  border-color: var(--danger-border);
   color: var(--danger);
+  background: var(--bg-elevated);
+}
+
+button.danger:hover:not(:disabled) {
+  border-color: var(--danger);
+  background: var(--gate-deny-bg);
 }
 
 input, select, textarea {
   width: 100%;
   border: 1px solid var(--border);
-  background: #0d1218;
+  background: var(--bg-input);
   color: var(--text);
   border-radius: 8px;
   padding: 0.55rem 0.7rem;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-placeholder);
+  opacity: 1;
 }
 
 textarea {
@@ -101,7 +179,7 @@ textarea {
 label {
   display: block;
   margin-bottom: 0.75rem;
-  color: var(--text-muted);
+  color: var(--text-label);
 }
 
 fieldset {
@@ -113,6 +191,7 @@ fieldset {
 
 legend {
   padding: 0 0.35rem;
+  color: var(--text-label);
 }
 
 .checkbox, .radio {
@@ -120,11 +199,42 @@ legend {
   align-items: flex-start;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
+  color: var(--text);
 }
 
 .checkbox input, .radio input {
   width: auto;
   margin-top: 0.2rem;
+  accent-color: var(--accent-strong);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: 0.75rem;
+  top: -3rem;
+  z-index: 100;
+  padding: 0.5rem 0.85rem;
+  background: var(--accent-strong);
+  color: var(--text-on-accent);
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.skip-link:focus {
+  top: 0.75rem;
 }
 
 .app-shell {
@@ -152,6 +262,7 @@ legend {
   padding: 0.35rem 0.85rem;
   font-size: 0.9rem;
   white-space: nowrap;
+  color: var(--text);
 }
 
 .tab-nav {
@@ -164,7 +275,7 @@ legend {
 .tab-nav button.active {
   background: var(--accent-strong);
   border-color: var(--accent-strong);
-  color: #fff;
+  color: var(--text-on-accent);
 }
 
 .app-main {
@@ -234,10 +345,12 @@ legend {
 
 .error {
   color: var(--danger);
+  font-weight: 500;
 }
 
 .success {
   color: var(--success);
+  font-weight: 500;
 }
 
 .gate-list {
@@ -264,16 +377,49 @@ legend {
   display: flex;
   justify-content: space-between;
   gap: 0.5rem;
+  align-items: baseline;
 }
 
 .gate-type {
   color: var(--text-muted);
   font-size: 0.85rem;
   text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-.gate-outcome {
-  font-weight: 600;
+.gate-outcome-badge {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  margin: 0.35rem 0;
+}
+
+.gate-act .gate-outcome-badge {
+  color: var(--gate-act-text);
+  background: var(--gate-act-bg);
+  border-color: var(--gate-act);
+}
+
+.gate-ask_human .gate-outcome-badge {
+  color: var(--gate-ask-text);
+  background: var(--gate-ask-bg);
+  border-color: var(--gate-ask);
+}
+
+.gate-deny .gate-outcome-badge {
+  color: var(--gate-deny-text);
+  background: var(--gate-deny-bg);
+  border-color: var(--gate-deny);
+}
+
+.gate-abstain .gate-outcome-badge {
+  color: var(--gate-abstain-text);
+  background: var(--gate-abstain-bg);
+  border-color: var(--gate-abstain);
 }
 
 .gate-confidence {
@@ -318,10 +464,15 @@ legend {
   cursor: pointer;
   color: var(--accent);
   margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.raw-json summary:hover {
+  color: var(--accent-hover);
 }
 
 .raw-json pre {
-  background: #0b1016;
+  background: var(--bg-code);
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 0.75rem;
@@ -351,13 +502,15 @@ legend {
 
 .scenario-nav button.active {
   border-color: var(--accent);
-  background: #243246;
+  background: var(--bg-disabled);
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 
 .scenario-category {
   font-size: 0.8rem;
   color: var(--text-muted);
   text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .explorer-triple {
@@ -384,10 +537,11 @@ legend {
 }
 
 code {
-  background: #0b1016;
+  background: var(--bg-code);
   padding: 0.1rem 0.35rem;
   border-radius: 4px;
   font-size: 0.9em;
+  border: 1px solid var(--border);
 }
 
 @media (max-width: 800px) {
@@ -409,22 +563,88 @@ code {
     --bg: #f4f7fb;
     --bg-elevated: #ffffff;
     --bg-card: #ffffff;
-    --border: #d5dee9;
+    --bg-input: #ffffff;
+    --bg-code: #f7f9fc;
+    --bg-disabled: #eef3f9;
+
     --text: #152033;
-    --text-muted: #5a6b82;
-    --accent: #2f6fad;
-    --accent-strong: #1f5f9c;
+    --text-label: #152033;
+    --text-muted: #4a5c73;
+    --text-placeholder: #5a6b82;
+    --text-disabled: #6b7d94;
+    --text-on-accent: #ffffff;
+
+    --border: #6b829c;
+    --border-strong: #4a6278;
+
+    --accent: #1a5a96;
+    --accent-strong: #1a5a96;
+    --accent-hover: #134878;
+    --danger: #b42318;
+    --danger-border: #b42318;
+    --success: #1a6b3a;
+    --warning: #7a5a12;
+
+    --gate-act: #1a6b42;
+    --gate-act-text: #0f3d24;
+    --gate-act-bg: #e6f5ec;
+    --gate-ask: #8a5f12;
+    --gate-ask-text: #5c3f0a;
+    --gate-ask-bg: #faf3e3;
+    --gate-deny: #b42318;
+    --gate-deny-text: #7a170f;
+    --gate-deny-bg: #fdecea;
+    --gate-abstain: #4a5568;
+    --gate-abstain-text: #2d3748;
+    --gate-abstain-bg: #eef1f5;
+
+    --focus-ring: #1a5a96;
+    --focus-ring-offset: #f4f7fb;
+
+    background: radial-gradient(circle at top, #e8eef5 0%, var(--bg) 55%);
+  }
+}
+
+@media (forced-colors: active) {
+  :root {
+    --focus-ring: Highlight;
+    --border: ButtonBorder;
+    --text: CanvasText;
+    --text-muted: CanvasText;
+    --bg-card: Canvas;
+    --bg-elevated: Canvas;
+    --bg-input: Canvas;
+    --accent: LinkText;
+    --accent-strong: ButtonFace;
+    --text-on-accent: ButtonText;
+    --danger: LinkText;
+    --success: CanvasText;
   }
 
-  input, select, textarea {
-    background: #fff;
-  }
-
-  .raw-json pre {
-    background: #f7f9fc;
-  }
-
+  button,
+  input,
+  select,
+  textarea,
+  .card,
+  .gate-item,
+  .mode-pill,
   code {
-    background: #eef3f9;
+    border: 1px solid ButtonBorder;
+  }
+
+  button.primary {
+    background: ButtonFace;
+    color: ButtonText;
+  }
+
+  .gate-outcome-badge {
+    border: 1px solid ButtonBorder;
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  .scenario-nav button.active {
+    box-shadow: none;
+    outline: 2px solid Highlight;
   }
 }
