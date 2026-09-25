@@ -201,10 +201,6 @@ state + questions  ──►  POST /v1/systemone  ──►  typed answers + con
                                               side effects (your code only)
 ```
 
-## Relationship to Botz Intents
-
-This repo is the **Jev substrate** demo: typed decisions from System One, with application-owned routing. It does not wire Botz MCP Trajectory — that is a sibling effort. Aligns with Botz Intents: model proposes, code promotes.
-
 ## License
 
 MIT
